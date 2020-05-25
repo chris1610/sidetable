@@ -367,6 +367,8 @@ For more info please click [here](./CONTRIBUTING.md)
 ## Credits
 
 This package was created with Cookiecutter and the `oldani/cookiecutter-simple-pypackage` project template.
+The code used in this package is heavily based on the posts from Peter Baumgartner, Steve Miller
+and Ted Petrou. Thank you!
 
 - [Cookiecutter](https://github.com/audreyr/cookiecutter)
 - [oldani/cookiecutter-simple-pypackage](https://github.com/oldani/cookiecutter-simple-pypackage)
