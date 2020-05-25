@@ -64,7 +64,7 @@ sidetable has several useful features:
 For the impatient:
 
 ```batch
-    $ pip install sidetable
+$ pip install sidetable
 ```
 
 ```python
@@ -108,21 +108,20 @@ I very much appreciate the work that all three authors did to point me in this d
 
 ```batch
 
-    $ pip install sidetable
+$ pip install sidetable
 ```
 
 This is the preferred method to install sidetable, as it will always
 install the most recent stable release. sidetable requires pandas 1.0 or higher and no
-additional dependencies.
+additional dependencies. It should run anywhere that pandas runs.
 
 ## Usage
 ```python
+import pandas as pd
+import sidetable
+import seaborn as sns
 
-    import pandas as pd
-    import sidetable
-    import seaborn as sns
-
-    df = sns.load_dataset('titanic')
+df = sns.load_dataset('titanic')
 ```
 
 sidetable uses the pandas DataFrame [accessor api](https://pandas.pydata.org/pandas-docs/stable/development/extending.html) 
@@ -152,9 +151,8 @@ Name: class, dtype: float64
 Which can be done, but is messy and a lot of typing and remembering:
 
 ```python
-
 pd.concat([df['class'].value_counts().rename('count'), 
-           df['class'].value_counts(normalize=True).rename('percentage')], axis=1)
+        df['class'].value_counts(normalize=True).rename('percentage')], axis=1)
 ```
 |        |   count |   percentage |
 |:-------|--------:|-------------:|
@@ -387,7 +385,6 @@ little bit helps, and credit will always be given. If you have a new idea for a 
 that we should add, please submit a ticket.
 
 For more info please click [here](./CONTRIBUTING.md)
-
 
 ## Credits
 
