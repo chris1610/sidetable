@@ -99,21 +99,12 @@ Before you submit a pull request, check that it meets these guidelines:
 To run a subset of tests:
 
 ```batch
-$ py.test tests.test_sidetable
+$ cd /tests
+$ py.test test_sidetable.py
 
 ```
 
 ## Deploying
 
-
 A reminder for the maintainers on how to deploy.
 Make sure all your changes are committed (including an entry in HISTORY.md).
-Then run:
-
-```batch
-$ bumpversion patch # possible: major / minor / patch
-$ git push
-$ git push --tags
-```
-
-Travis will then deploy to PyPI if tests pass.
