@@ -57,3 +57,9 @@ def test_cutoff(titanic):
 
     table = titanic.st.freq(['class', 'deck'], value='fare', thresh=.94)
     assert table.shape == (5, 6)
+
+def test_missing(titanic):
+    """Validate the missing table works
+    """
+    table = titanic.st.missing()
+    assert table.shape == (15, 3)

@@ -12,8 +12,7 @@ HtmlTestRunner
 .. image:: https://img.shields.io/travis/chris1610/sidetable.svg
         :target: https://travis-ci.org/chris1610/sidetable
 
-sidetable is a combination of a supercharged pandas `value_counts` plus `crosstab` that 
-builds simple but useful summary tables of your pandas DataFrame.
+sidetable builds simple but useful summary tables of your data
 
 
 Links:
@@ -29,7 +28,7 @@ requirements = ['pandas>=1.0']
 
 setup_requirements = ['pytest-runner', ]
 
-test_requirements = ['pytest', ]
+test_requirements = ['pytest', 'seaborn']
 
 here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -46,7 +45,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    description="sidetable is like supercharged pandas value_counts that allows you to quickly summarize your data. ",
+    description="sidetable builds simple but useful summary tables of your data",
     install_requires=requirements,
     license="MIT license",
     long_description=long_description,
@@ -55,6 +54,7 @@ setup(
     name='sidetable',
     packages=find_packages(include=['sidetable']),
     setup_requires=setup_requirements,
+    python_requires='>=3.6',
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/chris1610/sidetable',
