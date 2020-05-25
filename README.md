@@ -51,13 +51,38 @@ sidetable has several useful features:
 
 ## Table of Contents:
 
+- [Quick Start](#quickstart)
 - [Rationals](#rationale)
-- [Intallation](#installation)
+- [Installation](#installation)
 - [Usage](#usage)
 - [Caveats](#caveats)
 - [TODO](#todo)
 - [Contributing](#contributing)
 - [Credits](#credits)
+
+## Quickstart
+For the impatient:
+
+```batch
+    $ pip install sidetable
+```
+
+```python
+import sidetable
+import pandas as pd
+
+# Create your DataFrame
+df = pd.read_csv(myfile.csv)
+
+# Build a frequency table for one or more columns
+df.st.freq(['column1', 'column2'])
+
+# See what data is missing
+df.st.missing()
+```
+That's it. 
+
+Read on for more details and more examples of what you can do.
 
 ## Rationale
 The idea behind sidetable is that there are a handful of useful data analysis tasks that
