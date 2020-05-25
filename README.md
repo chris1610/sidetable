@@ -41,7 +41,8 @@ sidetable has several useful features:
 
 * See total counts and their relative percentages in one table. This is roughly equivalent to combining the
   output of `value_counts()` and `value_counts(normalize=True)` into one table.
-* Include cumulative totals and percentages to better understand your thresholds.
+* Include cumulative totals and percentages to better understand your thresholds. 
+  The [Pareto principle](https://en.wikipedia.org/wiki/Pareto_principle) applies to many different scenarios.
 * Aggregate columns together to see frequency counts for grouped data
 * Provide a threshold point above which all data is grouped into a single bucket. This is useful for
   quickly identifying the areas to focus your analysis.
@@ -49,14 +50,35 @@ sidetable has several useful features:
 
 ## Table of Contents:
 
+- [Rationals](#rationale)
 - [Intallation](#installation)
 - [Usage](#usage)
+- [Caveats](#caveats)
 - [TODO](#todo)
 - [Contributing](#contributing)
 - [Credits](#credits)
 
-## Installation
+## Rationale
+The idea behind sidetable is that there are a handful of useful data analysis tasks that
+you might run on any data set early in the data analysis process. While each of these
+tasks can be done in a handful of lines of pandas code, it is a lot of typing and 
+difficult to remember.
 
+In addition to providing useful functionality, this project is also a test to see how to
+build custom accessors using some of pandas relatively new API. I am hopeful this can
+serve as a model for other projects whether open source or just for your own usage.
+
+Finally, the solutions in sidetable are heavily based on three sources:
+
+- This [tweet thread](https://twitter.com/pmbaumgartner/status/1235925419012087809) by Peter Baumgartner
+- An [excellent article](https://opendatascience.com/frequencies-and-chaining-in-python-pandas/)
+  by Steve Miller that lays out many of the code concepts incorporated into sidetable.
+- Ted Petrou's [post](https://medium.com/dunder-data/finding-the-percentage-of-missing-values-in-a-pandas-dataframe-a04fa00f84ab) 
+  on finding the percentage of Missing Values in a DataFrame.
+
+I very much appreciate the work that all three authors did to point me in this direction.
+
+## Installation
 
 ```batch
 
@@ -77,9 +99,10 @@ additional dependencies.
     df = sns.load_dataset('titanic')
 ```
 
-sidetable uses the pandas DataFrame accessory api to add a `.st` accessor to all of your
-DataFrames. Once you `import sidetable` you are ready to go. In these examples, I will be
-using seaborn's Titanic dataset as an example but seaborn is not a direct dependency.
+sidetable uses the pandas DataFrame [accessor api](https://pandas.pydata.org/pandas-docs/stable/development/extending.html) 
+to add a `.st` accessor to all of your DataFrames. Once you `import sidetable` you are ready to 
+go. In these examples, I will be using seaborn's Titanic dataset as an example but
+seaborn is not a direct dependency.
 
 If you have used `value_counts()` before, you have probably wished it were easier to
 combine the values with percentage distribution.
@@ -126,7 +149,7 @@ df.st.freq(['class'])
 |  1 | First   |     216 |  0.242424 |                707 |             0.79349  |
 |  2 | Second  |     184 |  0.20651  |                891 |             1        |
 
-In addition, you can group columns together. If we want to see how they breakdown between
+In addition, you can group columns together. If we want to see the breakdown among
 class and sex:
 
 ```python
@@ -143,9 +166,9 @@ df.st.freq(['sex', 'class'])
 
 You can use as many groupings as you would like and make sense for your data.
 
-By default, sidetable counts the data. However, you can specify a `value` argument which is 
-another column to perform a summation on. For this data set, we can see how the fares are
-totaled by class:
+By default, sidetable counts the data. However, you can specify a `value` argument to 
+indicate that the data should be summed based on the data in another column. 
+For this data set, we can see how the fares are distributed by class:
 
 ```python
 df.st.freq(['class'], value='fare')
@@ -156,7 +179,7 @@ df.st.freq(['class'], value='fare')
 |  1 | Third   |  6714.7  |  0.234011 |           24892.1 |             0.867504 |
 |  2 | Second  |  3801.84 |  0.132496 |           28693.9 |             1        |
 
-Another feature of sidetable is that you can specify a  threshold. Many data analysis
+Another feature of sidetable is that you can specify a threshold. Many data analysis
 tasks can break down along the 80/20 rule. You can use the `thresh` to define a threshold
 and group all entries above that threshold into an "Other" grouping:
 
@@ -183,7 +206,7 @@ df.st.freq(['class', 'who'], value='fare', thresh=.80, other_label='All others')
 |  3 | Second     | man        | 1886.36 | 0.0657406 |          22845    |             0.796161 |
 |  4 | All others | All others | 5848.95 | 0.203839  |          28693.9  |             1        |
 
-Finally, sidetable includes a another summary table that shows the missing values in
+Finally, sidetable includes a summary table that shows the missing values in
 your data by count and percentage of total missing values in a column.
 
 ```python
@@ -207,16 +230,135 @@ df.st.missing()
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
 
+## Caveats
+sidetable supports grouping on any data type in a pandas DataFrame. This means that
+you could try something like:
+
+```python
+df.st.freq(['fare'])
+```
+In some cases where there are a fairly small discrete number of this may be useful. However,
+if you have a lot of unique values, you should [bin the data](https://pbpython.com/pandas-qcut-cut.html)
+first. In the example, above the data would include 248 rows and not be terribly useful.
+
+One alternative could be:
+
+```python
+df['fare_bin'] = pd.qcut(df['fare'], q=4, labels=['low', 'medium', 'high', 'x-high'])
+df.st.freq(['fare_bin'])
+```
+|    | fare_bin   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|---:|:-----------|--------:|----------:|-------------------:|---------------------:|
+|  0 | medium     |     224 |  0.251403 |                224 |             0.251403 |
+|  1 | low        |     223 |  0.250281 |                447 |             0.501684 |
+|  2 | x-high     |     222 |  0.249158 |                669 |             0.750842 |
+|  3 | high       |     222 |  0.249158 |                891 |             1        |
+
+
+The other caveat is that null or missing values can cause data to drop out while aggregating.
+For instance, if we look at the `deck` variable, there are a lot of missing values.
+
+```python
+df.st.freq(['deck'])
+```
+|    | deck   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|---:|:-------|--------:|----------:|-------------------:|---------------------:|
+|  0 | C      |      59 | 0.29064   |                 59 |             0.29064  |
+|  1 | B      |      47 | 0.231527  |                106 |             0.522167 |
+|  2 | D      |      33 | 0.162562  |                139 |             0.684729 |
+|  3 | E      |      32 | 0.157635  |                171 |             0.842365 |
+|  4 | A      |      15 | 0.0738916 |                186 |             0.916256 |
+|  5 | F      |      13 | 0.0640394 |                199 |             0.980296 |
+|  6 | G      |       4 | 0.0197044 |                203 |             1        |
+
+
+The total cumulative count only goes up to 203 not the 891 we have seen in other examples.
+Future versions of sidetable may handle this differently. For now, it is up to you to 
+decide how best to handle unknowns. For example, this version of the Titanic data set
+has a categorical value for `deck` so using fillna requires and extra step:
+
+```python
+df['deck_fillna'] = df['deck'].cat.add_categories('UNK').fillna('UNK')
+df.st.freq(['deck_fillna'])
+```
+|    | deck_fillna   |   Count |    Percent |   Cumulative Count |   Cumulative Percent |
+|---:|:--------------|--------:|-----------:|-------------------:|---------------------:|
+|  0 | UNK           |     688 | 0.772166   |                688 |             0.772166 |
+|  1 | C             |      59 | 0.0662177  |                747 |             0.838384 |
+|  2 | B             |      47 | 0.0527497  |                794 |             0.891134 |
+|  3 | D             |      33 | 0.037037   |                827 |             0.928171 |
+|  4 | E             |      32 | 0.0359147  |                859 |             0.964085 |
+|  5 | A             |      15 | 0.016835   |                874 |             0.98092  |
+|  6 | F             |      13 | 0.0145903  |                887 |             0.995511 |
+|  7 | G             |       4 | 0.00448934 |                891 |             1        |
+
+Another variant of this is that there might be certain groupings where there are no
+valid counts.
+
+For instance, if we look at the `deck` and `class`:
+
+```python
+df.st.freq(['deck', 'class'])
+```
+|    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
+|  0 | C      | First   |      59 | 0.29064   |                 59 |             0.29064  |
+|  1 | B      | First   |      47 | 0.231527  |                106 |             0.522167 |
+|  2 | D      | First   |      29 | 0.142857  |                135 |             0.665025 |
+|  3 | E      | First   |      25 | 0.123153  |                160 |             0.788177 |
+|  4 | A      | First   |      15 | 0.0738916 |                175 |             0.862069 |
+|  5 | F      | Second  |       8 | 0.0394089 |                183 |             0.901478 |
+|  6 | F      | Third   |       5 | 0.0246305 |                188 |             0.926108 |
+|  7 | G      | Third   |       4 | 0.0197044 |                192 |             0.945813 |
+|  8 | E      | Second  |       4 | 0.0197044 |                196 |             0.965517 |
+|  9 | D      | Second  |       4 | 0.0197044 |                200 |             0.985222 |
+| 10 | E      | Third   |       3 | 0.0147783 |                203 |             1        |
+
+There are only 11 combinations. If we want to see all - even if there are not any passengers
+fitting that criteria, use `clip_0=False` 
+
+```python
+df.st.freq(['deck', 'class'], clip_0=False)
+```
+print(df.st.freq(['deck', 'class'], clip_0=False).to_markdown())
+|    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
+|  0 | C      | First   |      59 | 0.29064   |                 59 |             0.29064  |
+|  1 | B      | First   |      47 | 0.231527  |                106 |             0.522167 |
+|  2 | D      | First   |      29 | 0.142857  |                135 |             0.665025 |
+|  3 | E      | First   |      25 | 0.123153  |                160 |             0.788177 |
+|  4 | A      | First   |      15 | 0.0738916 |                175 |             0.862069 |
+|  5 | F      | Second  |       8 | 0.0394089 |                183 |             0.901478 |
+|  6 | F      | Third   |       5 | 0.0246305 |                188 |             0.926108 |
+|  7 | G      | Third   |       4 | 0.0197044 |                192 |             0.945813 |
+|  8 | E      | Second  |       4 | 0.0197044 |                196 |             0.965517 |
+|  9 | D      | Second  |       4 | 0.0197044 |                200 |             0.985222 |
+| 10 | E      | Third   |       3 | 0.0147783 |                203 |             1        |
+| 11 | G      | Second  |       0 | 0         |                203 |             1        |
+| 12 | G      | First   |       0 | 0         |                203 |             1        |
+| 13 | F      | First   |       0 | 0         |                203 |             1        |
+| 14 | D      | Third   |       0 | 0         |                203 |             1        |
+| 15 | C      | Third   |       0 | 0         |                203 |             1        |
+| 16 | C      | Second  |       0 | 0         |                203 |             1        |
+| 17 | B      | Third   |       0 | 0         |                203 |             1        |
+| 18 | B      | Second  |       0 | 0         |                203 |             1        |
+| 19 | A      | Third   |       0 | 0         |                203 |             1        |
+| 20 | A      | Second  |       0 | 0         |                203 |             1        |
+
+In many cases this might be too much data, but sometimes the fact that a combination is 
+missing could be insightful.
 
 ## TODO
 
 - [ ] Handle NaN values more effectively
+- [ ] Offer binning options for continuous variables
 
 
 ## Contributing
 
 Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+little bit helps, and credit will always be given. If you have a new idea for a simple table
+that we should add, please submit a ticket.
 
 For more info please click [here](./CONTRIBUTING.md)
 
