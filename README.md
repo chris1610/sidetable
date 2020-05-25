@@ -6,8 +6,8 @@
 sidetable is a combination of a supercharged pandas `value_counts` plus `crosstab` that 
 builds simple but useful summary tables of your pandas DataFrame.
 
-Usage is simple. Install and import sidetable. Then access it through the new `.st` accessor 
-on your DataFrame. 
+Usage is straightforward. Install and `import sidetable`. Then access it through the 
+new `.st` accessor on your DataFrame. 
 
 For the Titanic data: `df.st.freq(['class'])` will build a frequency table like this:
 
@@ -42,8 +42,9 @@ sidetable has several useful features:
 * See total counts and their relative percentages in one table. This is roughly equivalent to combining the
   output of `value_counts()` and `value_counts(normalize=True)` into one table.
 * Include cumulative totals and percentages to better understand your thresholds. 
-  The [Pareto principle](https://en.wikipedia.org/wiki/Pareto_principle) applies to many different scenarios.
-* Aggregate columns together to see frequency counts for grouped data
+  The [Pareto principle](https://en.wikipedia.org/wiki/Pareto_principle) applies to many different scenarios
+  and this function makes it easy to see how your data is cumulatively distributed.
+* Aggregate multiple columns together to see frequency counts for grouped data.
 * Provide a threshold point above which all data is grouped into a single bucket. This is useful for
   quickly identifying the areas to focus your analysis.
 * Get a count of the missing values in your data.
@@ -68,13 +69,13 @@ In addition to providing useful functionality, this project is also a test to se
 build custom accessors using some of pandas relatively new API. I am hopeful this can
 serve as a model for other projects whether open source or just for your own usage.
 
-Finally, the solutions in sidetable are heavily based on three sources:
+The solutions in sidetable are heavily based on three sources:
 
 - This [tweet thread](https://twitter.com/pmbaumgartner/status/1235925419012087809) by Peter Baumgartner
 - An [excellent article](https://opendatascience.com/frequencies-and-chaining-in-python-pandas/)
   by Steve Miller that lays out many of the code concepts incorporated into sidetable.
 - Ted Petrou's [post](https://medium.com/dunder-data/finding-the-percentage-of-missing-values-in-a-pandas-dataframe-a04fa00f84ab) 
-  on finding the percentage of Missing Values in a DataFrame.
+  on finding the percentage of missing values in a DataFrame.
 
 I very much appreciate the work that all three authors did to point me in this direction.
 
@@ -129,7 +130,6 @@ Which can be done, but is messy and a lot of typing and remembering:
 
 pd.concat([df['class'].value_counts().rename('count'), 
            df['class'].value_counts(normalize=True).rename('percentage')], axis=1)
-          
 ```
 |        |   count |   percentage |
 |:-------|--------:|-------------:|
@@ -164,7 +164,7 @@ df.st.freq(['sex', 'class'])
 |  4 | female | First   |      94 | 0.105499  |                815 |             0.914703 |
 |  5 | female | Second  |      76 | 0.0852974 |                891 |             1        |
 
-You can use as many groupings as you would like and make sense for your data.
+You can use as many groupings as you would like.
 
 By default, sidetable counts the data. However, you can specify a `value` argument to 
 indicate that the data should be summed based on the data in another column. 
@@ -179,9 +179,10 @@ df.st.freq(['class'], value='fare')
 |  1 | Third   |  6714.7  |  0.234011 |           24892.1 |             0.867504 |
 |  2 | Second  |  3801.84 |  0.132496 |           28693.9 |             1        |
 
-Another feature of sidetable is that you can specify a threshold. Many data analysis
-tasks can break down along the 80/20 rule. You can use the `thresh` to define a threshold
-and group all entries above that threshold into an "Other" grouping:
+Another feature of sidetable is that you can specify a threshold. For many data analysis,
+you may want to break down into large groupings to focus on and ignore others. You can use
+the `thresh` argument to define a threshold and group all entries above that threshold 
+into an "Other" grouping:
 
 ```python
 df.st.freq(['class', 'who'], value='fare', thresh=.80)
@@ -194,7 +195,7 @@ df.st.freq(['class', 'who'], value='fare', thresh=.80)
 |  3 | Second  | man    | 1886.36 | 0.0657406 |          22845    |             0.796161 |
 |  4 | Others  | Others | 5848.95 | 0.203839  |          28693.9  |             1        |
 
-You can specify what label to use for all the others:
+You can further customize by specifying the label to use for all the others:
 ```python
 df.st.freq(['class', 'who'], value='fare', thresh=.80, other_label='All others')
 ```
@@ -275,7 +276,7 @@ df.st.freq(['deck'])
 The total cumulative count only goes up to 203 not the 891 we have seen in other examples.
 Future versions of sidetable may handle this differently. For now, it is up to you to 
 decide how best to handle unknowns. For example, this version of the Titanic data set
-has a categorical value for `deck` so using fillna requires and extra step:
+has a categorical value for `deck` so using `fillna` requires and extra step:
 
 ```python
 df['deck_fillna'] = df['deck'].cat.add_categories('UNK').fillna('UNK')
@@ -320,7 +321,6 @@ fitting that criteria, use `clip_0=False`
 ```python
 df.st.freq(['deck', 'class'], clip_0=False)
 ```
-print(df.st.freq(['deck', 'class'], clip_0=False).to_markdown())
 |    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
 |  0 | C      | First   |      59 | 0.29064   |                 59 |             0.29064  |
@@ -352,6 +352,7 @@ missing could be insightful.
 
 - [ ] Handle NaN values more effectively
 - [ ] Offer binning options for continuous variables
+- [ ] Offer more options, maybe plotting?
 
 
 ## Contributing
@@ -367,7 +368,8 @@ For more info please click [here](./CONTRIBUTING.md)
 
 This package was created with Cookiecutter and the `oldani/cookiecutter-simple-pypackage` project template.
 
-https://medium.com/dunder-data/finding-the-percentage-of-missing-values-in-a-pandas-dataframe-a04fa00f84ab
-
 - [Cookiecutter](https://github.com/audreyr/cookiecutter)
 - [oldani/cookiecutter-simple-pypackage](https://github.com/oldani/cookiecutter-simple-pypackage)
+- Peter Baumgartner - [tweet thread](https://twitter.com/pmbaumgartner/status/1235925419012087809)
+- Steve Miller - [article](https://opendatascience.com/frequencies-and-chaining-in-python-pandas/)
+- Ted Petrou - [post](https://medium.com/dunder-data/finding-the-percentage-of-missing-values-in-a-pandas-dataframe-a04fa00f84ab)
