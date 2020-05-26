@@ -108,3 +108,8 @@ $ py.test test_sidetable.py
 
 A reminder for the maintainers on how to deploy.
 Make sure all your changes are committed (including an entry in HISTORY.md).
+
+```python
+python setup.py sdist
+twine upload dist/* --verbose
+```
