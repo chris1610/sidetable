@@ -4,11 +4,11 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import math
 
-@pd.api.extensions.register_dataframe_accessor("st")
+@pd.api.extensions.register_dataframe_accessor("stb")
 class SideTableAccessor:
     """Pandas dataframe accessor that computes simple summary tables for your data.
-    Computes a frequency table on one or more columns with df.st.freq(['col_name']) 
-    Compute a table of missing values with df.st.missing()
+    Computes a frequency table on one or more columns with df.stb.freq(['col_name']) 
+    Compute a table of missing values with df.stb.missing()
     """
     def __init__(self, pandas_obj):
         self._validate(pandas_obj)
@@ -25,7 +25,7 @@ class SideTableAccessor:
         for one or more columns of data. Table is sorted and includes cumulative
         values which can be useful for identifying a cutoff.
 
-        Example of Titanic df.st.freq(['class']):
+        Example of Titanic df.stb.freq(['class']):
         	        class	Count	Percent	    Cumulative Count	Cumulative Percent
                 0	Third	491	    0.551066	491	                0.551066
                 1	First	216	    0.242424	707	                0.793490
@@ -36,12 +36,12 @@ class SideTableAccessor:
             thresh (float):    all values after this percentage will be combined into a 
                                single category. Default is to not cut any values off 
             other_label (str): if cutoff is used, this text will be used in the dataframe results
-            clip_0 (bool):     In cases where 0 counts are generated. remove them from the list
+            clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
             value (str):       Column that will be summed. If provided, summation is done
                                instead of counting each entry
             
         Returns:
-            Dataframe that summarizes the number of occurences of each value in the provided 
+            Dataframe that summarizes the number of occurrences of each value in the provided 
             columns or the sum of the data provided in the value parameter
         """
         if not isinstance(cols, list):
@@ -113,8 +113,10 @@ class SideTableAccessor:
                     dict.fromkeys(cols, other_label))
         return results
 
-    def missing(self):
-        """ Build table of missing data in each column
+    def missing(self, clip_0 = False):
+        """ Build table of missing data in each column. 
+
+            clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
 
         Returns:
             DataFrame with each Column including total Missing Values, Percent Missing 
@@ -127,6 +129,8 @@ class SideTableAccessor:
                                 1: 'Percent'
                             })
         missing['Total'] = len(self._obj)
+        if clip_0:
+            missing = missing[missing['Missing'] >0]
         return missing[['Missing', 'Total',
                         'Percent']].sort_values(by=['Missing'],
                                                 ascending=False)

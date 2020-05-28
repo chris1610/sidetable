@@ -3,13 +3,13 @@
 
 [![Pypi link](https://img.shields.io/pypi/v/sidetable.svg)](https://pypi.python.org/pypi/sidetable)
 
-sidetable is a combination of a supercharged pandas `value_counts` plus `crosstab` that 
-builds simple but useful summary tables of your pandas DataFrame.
+sidetable is a supercharged combination of pandas `value_counts` plus `crosstab` 
+that builds simple but useful summary tables of your pandas DataFrame.
 
 Usage is straightforward. Install and `import sidetable`. Then access it through the 
-new `.st` accessor on your DataFrame. 
+new `.stb` accessor on your DataFrame. 
 
-For the Titanic data: `df.st.freq(['class'])` will build a frequency table like this:
+For the Titanic data: `df.stb.freq(['class'])` will build a frequency table like this:
 
 |    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:--------|--------:|----------:|-------------------:|---------------------:|
@@ -17,7 +17,7 @@ For the Titanic data: `df.st.freq(['class'])` will build a frequency table like 
 |  1 | First   |     216 |  0.242424 |                707 |             0.79349  |
 |  2 | Second  |     184 |  0.20651  |                891 |             1        |
 
-You can also summarize missing values with `df.st.missing()`:
+You can also summarize missing values with `df.stb.missing()`:
 
 |             |   Missing |   Total |    Percent |
 |:------------|----------:|--------:|-----------:|
@@ -75,10 +75,10 @@ import pandas as pd
 df = pd.read_csv(myfile.csv)
 
 # Build a frequency table for one or more columns
-df.st.freq(['column1', 'column2'])
+df.stb.freq(['column1', 'column2'])
 
 # See what data is missing
-df.st.missing()
+df.stb.missing()
 ```
 That's it. 
 
@@ -125,7 +125,7 @@ df = sns.load_dataset('titanic')
 ```
 
 sidetable uses the pandas DataFrame [accessor api](https://pandas.pydata.org/pandas-docs/stable/development/extending.html) 
-to add a `.st` accessor to all of your DataFrames. Once you `import sidetable` you are ready to 
+to add a `.stb` accessor to all of your DataFrames. Once you `import sidetable` you are ready to 
 go. In these examples, I will be using seaborn's Titanic dataset as an example but
 seaborn is not a direct dependency.
 
@@ -163,7 +163,7 @@ pd.concat([df['class'].value_counts().rename('count'),
 Using sidetable is much simpler and you get cumulative totals, percents and more flexibility:
 
 ```python
-df.st.freq(['class'])
+df.stb.freq(['class'])
 ```
 
 |    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
@@ -176,7 +176,7 @@ In addition, you can group columns together. If we want to see the breakdown amo
 class and sex:
 
 ```python
-df.st.freq(['sex', 'class'])
+df.stb.freq(['sex', 'class'])
 ```
 |    | sex    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
@@ -194,7 +194,7 @@ indicate that the data should be summed based on the data in another column.
 For this data set, we can see how the fares are distributed by class:
 
 ```python
-df.st.freq(['class'], value='fare')
+df.stb.freq(['class'], value='fare')
 ```
 |    | class   |     fare |   Percent |   Cumulative fare |   Cumulative Percent |
 |---:|:--------|---------:|----------:|------------------:|---------------------:|
@@ -208,7 +208,7 @@ the `thresh` argument to define a threshold and group all entries above that thr
 into an "Other" grouping:
 
 ```python
-df.st.freq(['class', 'who'], value='fare', thresh=.80)
+df.stb.freq(['class', 'who'], value='fare', thresh=.80)
 ```
 |    | class   | who    |    fare |   Percent |   Cumulative fare |   Cumulative Percent |
 |---:|:--------|:-------|--------:|----------:|------------------:|---------------------:|
@@ -220,7 +220,7 @@ df.st.freq(['class', 'who'], value='fare', thresh=.80)
 
 You can further customize by specifying the label to use for all the others:
 ```python
-df.st.freq(['class', 'who'], value='fare', thresh=.80, other_label='All others')
+df.stb.freq(['class', 'who'], value='fare', thresh=.80, other_label='All others')
 ```
 |    | class      | who        |    fare |   Percent |   Cumulative fare |   Cumulative Percent |
 |---:|:-----------|:-----------|--------:|----------:|------------------:|---------------------:|
@@ -234,7 +234,7 @@ Finally, sidetable includes a summary table that shows the missing values in
 your data by count and percentage of total missing values in a column.
 
 ```python
-df.st.missing()
+df.stb.missing()
 ```
 |             |   Missing |   Total |    Percent |
 |:------------|----------:|--------:|-----------:|
@@ -259,7 +259,7 @@ sidetable supports grouping on any data type in a pandas DataFrame. This means t
 you could try something like:
 
 ```python
-df.st.freq(['fare'])
+df.stb.freq(['fare'])
 ```
 In some cases where there are a fairly small discrete number of this may be useful. However,
 if you have a lot of unique values, you should [bin the data](https://pbpython.com/pandas-qcut-cut.html)
@@ -269,7 +269,7 @@ One alternative could be:
 
 ```python
 df['fare_bin'] = pd.qcut(df['fare'], q=4, labels=['low', 'medium', 'high', 'x-high'])
-df.st.freq(['fare_bin'])
+df.stb.freq(['fare_bin'])
 ```
 |    | fare_bin   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:-----------|--------:|----------:|-------------------:|---------------------:|
@@ -283,7 +283,7 @@ The other caveat is that null or missing values can cause data to drop out while
 For instance, if we look at the `deck` variable, there are a lot of missing values.
 
 ```python
-df.st.freq(['deck'])
+df.stb.freq(['deck'])
 ```
 |    | deck   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:-------|--------:|----------:|-------------------:|---------------------:|
@@ -303,7 +303,7 @@ has a categorical value for `deck` so using `fillna` requires and extra step:
 
 ```python
 df['deck_fillna'] = df['deck'].cat.add_categories('UNK').fillna('UNK')
-df.st.freq(['deck_fillna'])
+df.stb.freq(['deck_fillna'])
 ```
 |    | deck_fillna   |   Count |    Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:--------------|--------:|-----------:|-------------------:|---------------------:|
@@ -322,7 +322,7 @@ valid counts.
 For instance, if we look at the `deck` and `class`:
 
 ```python
-df.st.freq(['deck', 'class'])
+df.stb.freq(['deck', 'class'])
 ```
 |    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
@@ -342,7 +342,7 @@ There are only 11 combinations. If we want to see all - even if there are not an
 fitting that criteria, use `clip_0=False` 
 
 ```python
-df.st.freq(['deck', 'class'], clip_0=False)
+df.stb.freq(['deck', 'class'], clip_0=False)
 ```
 |    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
