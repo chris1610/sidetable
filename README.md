@@ -82,7 +82,7 @@ df.stb.missing()
 ```
 That's it. 
 
-Read on for more details and more examples of what you can do.
+Read on for more details and more examples of what you can do sidetable.
 
 ## Rationale
 The idea behind sidetable is that there are a handful of useful data analysis tasks that
