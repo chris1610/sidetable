@@ -93,6 +93,8 @@ difficult to remember.
 In addition to providing useful functionality, this project is also a test to see how to
 build custom accessors using some of pandas relatively new API. I am hopeful this can
 serve as a model for other projects whether open source or just for your own usage.
+Please check out the [release announcement](https://pbpython.com/sidetable.html) for more
+information about the usage and how to use this as a model for your own projects.
 
 The solutions in sidetable are heavily based on three sources:
 
