@@ -64,7 +64,7 @@ sidetable has several useful features:
 For the impatient:
 
 ```batch
-$ pip install sidetable
+$ python -m pip install sidetable
 ```
 
 ```python
