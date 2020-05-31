@@ -27,7 +27,7 @@ class SideTableAccessor:
              other_label='Others',
              clip_0=True,
              value=None,
-             format=True):
+             style=False):
         """ Create a table that counts the frequency of occurrence or summation of values 
         for one or more columns of data. Table is sorted and includes cumulative
         values which can be useful for identifying a cutoff.
@@ -46,7 +46,7 @@ class SideTableAccessor:
             clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
             value (str):       Column that will be summed. If provided, summation is done
                                instead of counting each entry
-            format (bool):     Apply a pandas style to format percentages
+            style (bool):     Apply a pandas style to format percentages
             
         Returns:
             Dataframe that summarizes the number of occurrences of each value in the provided 
@@ -121,7 +121,7 @@ class SideTableAccessor:
                 all_others, ignore_index=True).drop(columns=['Others']).fillna(
                     dict.fromkeys(cols, other_label))
 
-        if format:
+        if style:
             format_dict = {
                 'Percent': '{:.2%}',
                 'Cumulative Percent': '{:.2%}',
@@ -133,11 +133,11 @@ class SideTableAccessor:
         else:
             return results
 
-    def missing(self, clip_0=False, format=True):
+    def missing(self, clip_0=False, style=False):
         """ Build table of missing data in each column. 
 
             clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
-            format (bool):     Apply a pandas style to format percentages
+            style (bool):     Apply a pandas style to format percentages
 
         Returns:
             DataFrame with each Column including total Missing Values, Percent Missing 
@@ -156,7 +156,7 @@ class SideTableAccessor:
         results = missing[['Missing', 'Total',
                            'Percent']].sort_values(by=['Missing'],
                                                    ascending=False)
-        if format:
+        if style:
             format_dict = {'Percent': '{:.2%}', 'Total': '{0:,.0f}'}
             return results.style.format(format_dict)
         else:

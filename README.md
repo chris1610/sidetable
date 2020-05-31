@@ -110,7 +110,7 @@ I very much appreciate the work that all three authors did to point me in this d
 
 ```batch
 
-$ pip install sidetable
+$ python -m pip install sidetable
 ```
 
 This is the preferred method to install sidetable, as it will always
@@ -173,6 +173,20 @@ df.stb.freq(['class'])
 |  0 | Third   |     491 |  0.551066 |                491 |             0.551066 |
 |  1 | First   |     216 |  0.242424 |                707 |             0.79349  |
 |  2 | Second  |     184 |  0.20651  |                891 |             1        |
+
+If you want to style the results so percentages and large numbers are easier to read, 
+use `style=True`:
+
+```python
+df.stb.freq(['class'], style=True)
+```
+|    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|---:|:--------|--------:|----------:|-------------------:|---------------------:|
+|  0 | Third   |     491 |  55.11%   |                491 |               55.11% |
+|  1 | First   |     216 |  24.24%   |                707 |               79.35% |
+|  2 | Second  |     184 |  20.65%   |                891 |              100.00% |
+
+
 
 In addition, you can group columns together. If we want to see the breakdown among
 class and sex:
@@ -255,6 +269,32 @@ df.stb.missing()
 | adult_male  |         0 |     891 | 0          |
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
+
+If you wish to see the results with styles applied to the Percent and Total column,
+use:
+
+```python
+df.stb.missing(style=True)
+```
+
+|             |   Missing |   Total |    Percent |
+|:------------|----------:|--------:|-----------:|
+| deck        |       688 |     891 | 77.25%     |
+| age         |       177 |     891 | 19.87%     |
+| embarked    |         2 |     891 | 0.22%      |
+| embark_town |         2 |     891 | 0.22%      |
+| survived    |         0 |     891 | 0          |
+| pclass      |         0 |     891 | 0          |
+| sex         |         0 |     891 | 0          |
+| sibsp       |         0 |     891 | 0          |
+| parch       |         0 |     891 | 0          |
+| fare        |         0 |     891 | 0          |
+| class       |         0 |     891 | 0          |
+| who         |         0 |     891 | 0          |
+| adult_male  |         0 |     891 | 0          |
+| alive       |         0 |     891 | 0          |
+| alone       |         0 |     891 | 0          |
+
 
 ## Caveats
 sidetable supports grouping on any data type in a pandas DataFrame. This means that
