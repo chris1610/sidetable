@@ -161,3 +161,53 @@ class SideTableAccessor:
             return results.style.format(format_dict)
         else:
             return results
+
+    def subtotal(self):
+        """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
+        add a subtotal at the lowest level as well as a Grand total
+        Returns:
+            DataFrame Grand Total and Sub Total
+        """
+        levels = self._obj.index.nlevels
+        # add enough extra spaces so Grand total will show at end of DataFrame
+        grand_total_label = tuple(['Grand Total'] +
+                                  [' ' for _ in range(1, levels)])
+        if levels == 1:
+            # No subtotals since no groups
+            # If not multi-level, rename should not be a tuple
+            # Add the Grand Total label at the end
+            return self._obj.append(
+                self._obj.sum(numeric_only=True).rename(grand_total_label[0]))
+        else:
+            # Summarize each group and add a subtotal at the end
+            # of the dataframe
+
+            # If a CategoricalIndex is included, can not append
+            # This is a hacky way of removing the CategoricalIndex
+            # Essentially rebuild the index so that it is no longer a
+            # CategoricalIndex
+            self._obj.index = pd.MultiIndex.from_tuples(
+                [n for i, n in enumerate(self._obj.index)],
+                names=list(self._obj.index.names))
+            output = []
+            for k, d in self._obj.groupby(level=0):
+                # Build out a list that matches the groups so that when
+                # we add it back together, the DataFrame order is preserved
+
+                # Include blanks so that the total is aligned properly
+                # We include a value for the first and last so need blanks
+                # for the rest
+                num_spaces = levels-2
+                # Pick the second to last level to annotate the subtotal
+                sub_total_name = d.index.names[-2]
+
+                # Build out the label
+                sub_total_label = [k] + num_spaces*[''] + [f'{sub_total_name} Sub Total']
+                
+                # Total the values. Make sure the name is an appropriate tuple
+                # so that when appending, it gets placed in the right location
+                sub_total = d.sum().rename(tuple(sub_total_label))
+                output.append(d.append(sub_total))
+
+            return pd.concat(output).append(
+                self._obj.sum(numeric_only=True).rename(grand_total_label))
