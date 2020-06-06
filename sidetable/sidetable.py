@@ -162,18 +162,26 @@ class SideTableAccessor:
         else:
             return results
 
-    def subtotal(self):
+    def subtotal(self, grand_label='Grand Total', sub_label='subtotal'):
         """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
         add a subtotal at the lowest level as well as a Grand total
+
+            grand_label (str):     Label override for the total of the entire DataFrame
+            sub_label (str):       Label override for the sub total of the group
+
         Returns:
             DataFrame Grand Total and Sub Total
         """
         levels = self._obj.index.nlevels
         # add enough extra spaces so Grand total will show at end of DataFrame
-        grand_total_label = tuple(['Grand Total'] +
+        grand_total_label = tuple([grand_label] +
                                   [' ' for _ in range(1, levels)])
         if levels == 1:
             # No subtotals since no groups
+            # Make sure the index is an object so we can append the subtotal without
+            # Getting into Categorical issues
+            self._obj.index = self._obj.index.astype('object')
+
             # If not multi-level, rename should not be a tuple
             # Add the Grand Total label at the end
             return self._obj.append(
@@ -198,11 +206,9 @@ class SideTableAccessor:
                 # We include a value for the first and last so need blanks
                 # for the rest
                 num_spaces = levels-2
-                # Pick the second to last level to annotate the subtotal
-                sub_total_name = d.index.names[-2]
 
                 # Build out the label
-                sub_total_label = [k] + num_spaces*[''] + [f'{sub_total_name} Sub Total']
+                sub_total_label = [k] + num_spaces*[''] + [f'{k} {sub_label}']
                 
                 # Total the values. Make sure the name is an appropriate tuple
                 # so that when appending, it gets placed in the right location
