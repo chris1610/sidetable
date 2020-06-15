@@ -26,8 +26,6 @@ from codecs import open
 
 requirements = ['pandas>=1.0']
 
-setup_requirements = ['pytest-runner', ]
-
 test_requirements = ['pytest', 'seaborn']
 
 here = path.abspath(path.dirname(__file__))

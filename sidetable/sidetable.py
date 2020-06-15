@@ -162,21 +162,55 @@ class SideTableAccessor:
         else:
             return results
 
-    def subtotal(self, grand_label='Grand Total', sub_label='subtotal'):
+    def _get_group_levels(self, level=1):
+        """Internal helper function to flatten out the group list from a multiindex
+
+        Args:
+            level (int, optional): [description]. Defaults to 1.
+
+        Returns:
+            [type]: [description]
+        """
+        list_items = [col[0:level] for col in self._obj.index]
+        results = []
+        for x in list_items:
+            if not x in results:
+                results+=[x]
+        return results
+
+    def subtotal(self,
+                 sub_level=None,
+                 grand_label='Grand Total',
+                 sub_label='subtotal',
+                 show_separator=True):
         """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
         add a subtotal at the lowest level as well as a Grand total
 
+            sub_level (int):       Grouping level to calculate subtotal. Default is max available.
             grand_label (str):     Label override for the total of the entire DataFrame
             sub_label (str):       Label override for the sub total of the group
+            show_separator (bool): Default is True to show subtotal levels separated by |
 
         Returns:
             DataFrame Grand Total and Sub Total
         """
-        levels = self._obj.index.nlevels
-        # add enough extra spaces so Grand total will show at end of DataFrame
-        grand_total_label = tuple([grand_label] +
-                                  [' ' for _ in range(1, levels)])
-        if levels == 1:
+
+        all_levels = self._obj.index.nlevels
+
+        max_level = all_levels - 1
+
+        # No value is specified, use the maximum
+        if not sub_level:
+            sub_level = max_level
+        if sub_level > max_level:
+            raise AttributeError(
+                f'Maximum number of subtotal levels is {max_level}')
+
+        grand_total_label = tuple([f'{grand_label}'] +
+                                  [' ' for _ in range(1, all_levels)])
+
+        # If this is not a multiindex, just add the grand total to the DataFrame
+        if all_levels == 1:
             # No subtotals since no groups
             # Make sure the index is an object so we can append the subtotal without
             # Getting into Categorical issues
@@ -186,34 +220,28 @@ class SideTableAccessor:
             # Add the Grand Total label at the end
             return self._obj.append(
                 self._obj.sum(numeric_only=True).rename(grand_total_label[0]))
-        else:
-            # Summarize each group and add a subtotal at the end
-            # of the dataframe
 
-            # If a CategoricalIndex is included, can not append
-            # This is a hacky way of removing the CategoricalIndex
-            # Essentially rebuild the index so that it is no longer a
-            # CategoricalIndex
-            self._obj.index = pd.MultiIndex.from_tuples(
-                [n for i, n in enumerate(self._obj.index)],
-                names=list(self._obj.index.names))
-            output = []
-            for k, d in self._obj.groupby(level=0):
-                # Build out a list that matches the groups so that when
-                # we add it back together, the DataFrame order is preserved
+        # Remove any categorical indices
+        self._obj.index = pd.MultiIndex.from_tuples(
+            [n for i, n in enumerate(self._obj.index)],
+            names=list(self._obj.index.names))
+        
+        output = []
+        for cross_section in self._get_group_levels(sub_level):
+            num_spaces = all_levels - len(cross_section)
+            if show_separator:
+                total_label = ' | '.join(cross_section) + f' {sub_label}'
+            else:
+                total_label = f'{sub_label}'
+            if sub_level == 1:
+                sub_total_label = [cross_section[0]] + [total_label] + [' '] * num_spaces
+            else:    
+                sub_total_label = list(cross_section[0:(
+                    sub_level - 1)]) + [total_label] + [' '] * num_spaces
+            section = self._obj.xs(cross_section, drop_level=False)
+            subtotal = section.sum(numeric_only=True).rename(
+                tuple(sub_total_label))
+            output.append(section.append(subtotal))
 
-                # Include blanks so that the total is aligned properly
-                # We include a value for the first and last so need blanks
-                # for the rest
-                num_spaces = levels-2
-
-                # Build out the label
-                sub_total_label = [k] + num_spaces*[''] + [f'{k} {sub_label}']
-                
-                # Total the values. Make sure the name is an appropriate tuple
-                # so that when appending, it gets placed in the right location
-                sub_total = d.sum().rename(tuple(sub_total_label))
-                output.append(d.append(sub_total))
-
-            return pd.concat(output).append(
-                self._obj.sum(numeric_only=True).rename(grand_total_label))
+        return pd.concat(output).append(
+            self._obj.sum(numeric_only=True).rename(grand_total_label))
