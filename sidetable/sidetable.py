@@ -182,14 +182,16 @@ class SideTableAccessor:
                  sub_level=None,
                  grand_label='Grand Total',
                  sub_label='subtotal',
-                 show_separator=True):
+                 show_sep=True,
+                 sep = ' | '):
         """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
         add a subtotal at the lowest level as well as a Grand total
 
             sub_level (int):       Grouping level to calculate subtotal. Default is max available.
             grand_label (str):     Label override for the total of the entire DataFrame
             sub_label (str):       Label override for the sub total of the group
-            show_separator (bool): Default is True to show subtotal levels separated by |
+            show_sep  (bool):      Default is True to show subtotal levels separated by one or more characters
+            sep (str):             Seperator for levels, defaults to |
 
         Returns:
             DataFrame Grand Total and Sub Total
@@ -200,16 +202,16 @@ class SideTableAccessor:
         max_level = all_levels - 1
 
         # No value is specified, use the maximum
-        if not sub_level:
+        if sub_level is None:
             sub_level = max_level
         if sub_level > max_level:
             raise AttributeError(
-                f'Maximum number of subtotal levels is {max_level}')
+                f'Subtotal level must be between 1 and {max_level}')
 
         grand_total_label = tuple([f'{grand_label}'] +
                                   [' ' for _ in range(1, all_levels)])
 
-        # If this is not a multiindex, just add the grand total to the DataFrame
+        # If this is not a multiindex, add the grand total to the DataFrame
         if all_levels == 1:
             # No subtotals since no groups
             # Make sure the index is an object so we can append the subtotal without
@@ -221,6 +223,10 @@ class SideTableAccessor:
             return self._obj.append(
                 self._obj.sum(numeric_only=True).rename(grand_total_label[0]))
 
+        # Need to do this check after processing DataFrame with no levels
+        if sub_level <= 0:
+            raise AttributeError(
+                f'Subtotal level must be greater than 0')
         # Remove any categorical indices
         self._obj.index = pd.MultiIndex.from_tuples(
             [n for i, n in enumerate(self._obj.index)],
@@ -229,15 +235,11 @@ class SideTableAccessor:
         output = []
         for cross_section in self._get_group_levels(sub_level):
             num_spaces = all_levels - len(cross_section)
-            if show_separator:
-                total_label = ' | '.join(cross_section) + f' {sub_label}'
+            if show_sep:
+                total_label = sep.join(cross_section) + f' - {sub_label}'
             else:
                 total_label = f'{sub_label}'
-            if sub_level == 1:
-                sub_total_label = [cross_section[0]] + [total_label] + [' '] * num_spaces
-            else:    
-                sub_total_label = list(cross_section[0:(
-                    sub_level - 1)]) + [total_label] + [' '] * num_spaces
+            sub_total_label = list(cross_section[0:sub_level]) + [total_label] + [' '] * num_spaces
             section = self._obj.xs(cross_section, drop_level=False)
             subtotal = section.sum(numeric_only=True).rename(
                 tuple(sub_total_label))
