@@ -71,7 +71,7 @@ def test_missing(titanic):
 
 
 def test_grand_total(titanic):
-    """Validate grand total works without groups 
+    """Validate grand total works without groups
     """
     table = titanic.stb.subtotal()
     assert table.shape == (892, 15)
@@ -79,7 +79,7 @@ def test_grand_total(titanic):
 
 
 def test_grand_total_label(titanic):
-    """Validate grand total label works 
+    """Validate grand total label works
     """
     table = titanic.stb.subtotal(grand_label='Total')
     assert table.shape == (892, 15)
@@ -95,4 +95,4 @@ def test_subtotal(titanic):
     assert table.stb.subtotal(sub_level=2,
                               sub_label='Group Total').shape == (57, 1)
     assert table.stb.subtotal(sub_level=2, show_sep=False).shape == (57, 1)
-    assert table.stb.subtotal(sub_level=[1,2]).shape == (59, 1)
+    assert table.stb.subtotal(sub_level=[1, 2]).shape == (59, 1)
