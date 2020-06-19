@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Tests for `sidetable` package."""
 
 import pytest
@@ -17,12 +16,14 @@ def titanic():
     df = sns.load_dataset('titanic')
     return df
 
+
 def test_single_group(titanic):
     """Basic test that we aggregate correctly for one column
     """
     table = titanic.stb.freq(['sex'])
-    assert table.shape == (2,5)
+    assert table.shape == (2, 5)
     assert table['Count'].sum() == 891
+
 
 def test_double_group(titanic):
     """Aggregate multiple columns
@@ -31,11 +32,13 @@ def test_double_group(titanic):
     assert table.shape == (6, 6)
     assert table['Count'].sum() == 891
 
+
 def test_values(titanic):
     """ Summ the values of the fares
     """
     table = titanic.stb.freq(['embark_town', 'class'], value='fare')
     assert table.count()['class'] == 9
+
 
 def test_clipping(titanic):
     """Make sure we can show all the values
@@ -47,7 +50,8 @@ def test_clipping(titanic):
     assert table.shape == (21, 6)
 
     table = titanic.stb.freq(['class', 'deck'], value='fare')
-    assert table.shape ==  (11,6)
+    assert table.shape == (11, 6)
+
 
 def test_cutoff(titanic):
     """ Does the cutoff limit the extra rows
@@ -58,11 +62,13 @@ def test_cutoff(titanic):
     table = titanic.stb.freq(['class', 'deck'], value='fare', thresh=.94)
     assert table.shape == (5, 6)
 
+
 def test_missing(titanic):
     """Validate the missing table works
     """
     table = titanic.stb.missing()
     assert table.shape == (15, 3)
+
 
 def test_grand_total(titanic):
     """Validate grand total works without groups 
@@ -71,6 +77,7 @@ def test_grand_total(titanic):
     assert table.shape == (892, 15)
     assert table.loc['Grand Total', 'fare'] == 28693.9493
 
+
 def test_grand_total_label(titanic):
     """Validate grand total label works 
     """
@@ -78,11 +85,14 @@ def test_grand_total_label(titanic):
     assert table.shape == (892, 15)
     assert table.loc['Total', 'fare'] == 28693.9493
 
+
 def test_subtotal(titanic):
     """ Test subtotal scenarios
     """
-    table = titanic.groupby(['sex', 'deck', 'class']).agg({'fare':['sum']})
-    assert table.stb.subtotal().shape == (57,1)
-    assert table.stb.subtotal(sub_level=2).shape == (57,1)
-    assert table.stb.subtotal(sub_level=2, sub_label='Group Total').shape == (57,1)
-    assert table.stb.subtotal(sub_level=2, show_sep=False).shape == (57,1)
+    table = titanic.groupby(['sex', 'deck', 'class']).agg({'fare': ['sum']})
+    assert table.stb.subtotal().shape == (59, 1)
+    assert table.stb.subtotal(sub_level=2).shape == (57, 1)
+    assert table.stb.subtotal(sub_level=2,
+                              sub_label='Group Total').shape == (57, 1)
+    assert table.stb.subtotal(sub_level=2, show_sep=False).shape == (57, 1)
+    assert table.stb.subtotal(sub_level=[1,2]).shape == (59, 1)
