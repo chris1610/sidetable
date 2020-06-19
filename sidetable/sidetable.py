@@ -2,13 +2,12 @@
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
-import math
 
 
 @pd.api.extensions.register_dataframe_accessor("stb")
 class SideTableAccessor:
     """Pandas dataframe accessor that computes simple summary tables for your data.
-    Computes a frequency table on one or more columns with df.stb.freq(['col_name']) 
+    Computes a frequency table on one or more columns with df.stb.freq(['col_name'])
     Compute a table of missing values with df.stb.missing()
     """
     def __init__(self, pandas_obj):
@@ -28,28 +27,28 @@ class SideTableAccessor:
              clip_0=True,
              value=None,
              style=False):
-        """ Create a table that counts the frequency of occurrence or summation of values 
+        """ Create a table that counts the frequency of occurrence or summation of values
         for one or more columns of data. Table is sorted and includes cumulative
         values which can be useful for identifying a cutoff.
 
         Example of Titanic df.stb.freq(['class']):
-        	        class	Count	Percent	    Cumulative Count	Cumulative Percent
+                 class	  Count	    Percent	    Cumulative Count	Cumulative Percent
                 0	Third	491	    0.551066	491	                0.551066
                 1	First	216	    0.242424	707	                0.793490
                 2	Second	184	    0.206510	891	                1.000000
-        
+
         Args:
             cols (list):       dataframe column names that will be grouped together
-            thresh (float):    all values after this percentage will be combined into a 
-                               single category. Default is to not cut any values off 
+            thresh (float):    all values after this percentage will be combined into a
+                               single category. Default is to not cut any values off
             other_label (str): if cutoff is used, this text will be used in the dataframe results
             clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
             value (str):       Column that will be summed. If provided, summation is done
                                instead of counting each entry
             style (bool):     Apply a pandas style to format percentages
-            
+
         Returns:
-            Dataframe that summarizes the number of occurrences of each value in the provided 
+            Dataframe that summarizes the number of occurrences of each value in the provided
             columns or the sum of the data provided in the value parameter
         """
         if not isinstance(cols, list):
@@ -94,14 +93,15 @@ class SideTableAccessor:
 
         # Keep track of cumulative counts or totals as well as their relative percent
         results[f'Cumulative {col_name}'] = results[col_name].cumsum()
-        results[f'Cumulative Percent'] = results[f'Cumulative {col_name}'] / total
+        results[
+            'Cumulative Percent'] = results[f'Cumulative {col_name}'] / total
 
         # cutoff is a percentage below which all values are grouped together in an
         # others category
         if thresh < 1:
             # Flag the All Other rows
             results['Others'] = False
-            results.loc[results[f'Cumulative Percent'] > thresh,
+            results.loc[results['Cumulative Percent'] > thresh,
                         'Others'] = True
 
             # Calculate the total amount and percentage of the others
@@ -134,13 +134,13 @@ class SideTableAccessor:
             return results
 
     def missing(self, clip_0=False, style=False):
-        """ Build table of missing data in each column. 
+        """ Build table of missing data in each column.
 
             clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
             style (bool):     Apply a pandas style to format percentages
 
         Returns:
-            DataFrame with each Column including total Missing Values, Percent Missing 
+            DataFrame with each Column including total Missing Values, Percent Missing
             and Total rows
         """
         missing = pd.concat([self._obj.isna().sum(),
@@ -174,8 +174,8 @@ class SideTableAccessor:
         list_items = [col[0:level] for col in self._obj.index]
         results = []
         for x in list_items:
-            if not x in results:
-                results+=[x]
+            if x not in results:
+                results += [x]
         return results
 
     def subtotal(self,
@@ -183,14 +183,15 @@ class SideTableAccessor:
                  grand_label='Grand Total',
                  sub_label='subtotal',
                  show_sep=True,
-                 sep = ' | '):
+                 sep=' | '):
         """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
         add a subtotal at the lowest level as well as a Grand total
 
             sub_level (int):       Grouping level to calculate subtotal. Default is max available.
             grand_label (str):     Label override for the total of the entire DataFrame
             sub_label (str):       Label override for the sub total of the group
-            show_sep  (bool):      Default is True to show subtotal levels separated by one or more characters
+            show_sep  (bool):      Default is True to show subtotal levels separated by one
+                                   or more characters
             sep (str):             Seperator for levels, defaults to |
 
         Returns:
@@ -225,13 +226,12 @@ class SideTableAccessor:
 
         # Need to do this check after processing DataFrame with no levels
         if sub_level <= 0:
-            raise AttributeError(
-                f'Subtotal level must be greater than 0')
+            raise AttributeError('Subtotal level must be greater than 0')
         # Remove any categorical indices
         self._obj.index = pd.MultiIndex.from_tuples(
             [n for i, n in enumerate(self._obj.index)],
             names=list(self._obj.index.names))
-        
+
         output = []
         for cross_section in self._get_group_levels(sub_level):
             num_spaces = all_levels - len(cross_section)
@@ -239,7 +239,9 @@ class SideTableAccessor:
                 total_label = sep.join(cross_section) + f' - {sub_label}'
             else:
                 total_label = f'{sub_label}'
-            sub_total_label = list(cross_section[0:sub_level]) + [total_label] + [' '] * num_spaces
+            sub_total_label = list(cross_section[0:sub_level]) + [
+                total_label
+            ] + [' '] * num_spaces
             section = self._obj.xs(cross_section, drop_level=False)
             subtotal = section.sum(numeric_only=True).rename(
                 tuple(sub_total_label))

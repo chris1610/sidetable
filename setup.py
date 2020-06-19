@@ -21,7 +21,6 @@ Links:
 """
 
 from setuptools import setup, find_packages
-from pathlib import Path
 from codecs import open
 
 requirements = ['pandas>=1.0']
@@ -51,7 +50,7 @@ setup(
     keywords='sidetable',
     name='sidetable',
     packages=find_packages(include=['sidetable']),
-    setup_requires=setup_requirements,
+    setup_requires=['flake8'],
     python_requires='>=3.6',
     test_suite='tests',
     tests_require=test_requirements,
