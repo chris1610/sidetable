@@ -2,6 +2,7 @@
 
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
+from functools import reduce
 
 
 @pd.api.extensions.register_dataframe_accessor("stb")
@@ -185,29 +186,32 @@ class SideTableAccessor:
                  show_sep=True,
                  sep=' | '):
         """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
-        add a subtotal at the lowest level as well as a Grand total
+        add a subtotal at all levels defined in sub_level as well as a Grand Total
 
-            sub_level (int):       Grouping level to calculate subtotal. Default is max available.
-            grand_label (str):     Label override for the total of the entire DataFrame
-            sub_label (str):       Label override for the sub total of the group
-            show_sep  (bool):      Default is True to show subtotal levels separated by one
-                                   or more characters
-            sep (str):             Seperator for levels, defaults to |
+            sub_level (int or list): Grouping level to calculate subtotal. Default is max
+                                     available. Can pass a single integer or a list of valid
+                                     levels
+            grand_label (str):       Label override for the total of the entire DataFrame
+            sub_label (str):         Label override for the sub total of the group
+            show_sep  (bool):        Default is True to show subtotal levels separated by one
+                                     or more characters
+            sep (str):               Seperator for levels, defaults to |
 
         Returns:
-            DataFrame Grand Total and Sub Total
+            DataFrame with Grand Total and Sub Total levels as specified in sub_level
         """
-
         all_levels = self._obj.index.nlevels
-
-        max_level = all_levels - 1
 
         # No value is specified, use the maximum
         if sub_level is None:
-            sub_level = max_level
-        if sub_level > max_level:
-            raise AttributeError(
-                f'Subtotal level must be between 1 and {max_level}')
+            sub_calc_list = list(range(1, all_levels))
+        # Sort the list
+        elif isinstance(sub_level, list):
+            sub_calc_list = sub_level
+            sub_calc_list.sort()
+        # Convert an integer to a list
+        elif isinstance(sub_level, int):
+            sub_calc_list = [sub_level]
 
         grand_total_label = tuple([f'{grand_label}'] +
                                   [' ' for _ in range(1, all_levels)])
@@ -223,15 +227,51 @@ class SideTableAccessor:
             # Add the Grand Total label at the end
             return self._obj.append(
                 self._obj.sum(numeric_only=True).rename(grand_total_label[0]))
+            # Need to do this check after processing DataFrame with no levels
 
-        # Need to do this check after processing DataFrame with no levels
-        if sub_level <= 0:
-            raise AttributeError('Subtotal level must be greater than 0')
+        # Check that list is in the appropriate range
+        if sub_calc_list[0] <= 0 or sub_calc_list[-1] > all_levels - 1:
+            raise AttributeError(
+                f'Subtotal level must be between 1 and {all_levels-1}')
+
         # Remove any categorical indices
         self._obj.index = pd.MultiIndex.from_tuples(
             [n for i, n in enumerate(self._obj.index)],
             names=list(self._obj.index.names))
 
+        subtotal_levels = []
+        # Calculate the subtotal at each level given
+        for i in sub_calc_list:
+            level_result = self._calcsubtotal(sub_level=i,
+                                              sub_label=sub_label,
+                                              show_sep=show_sep,
+                                              sep=sep)
+            subtotal_levels.append(level_result)
+
+        # Use combine first to join all the individual levels together into a single
+        # DataFrame
+        results = reduce(lambda l, r: l.combine_first(r), subtotal_levels)
+        return results.append(
+            self._obj.sum(numeric_only=True).rename(grand_total_label))
+
+    def _calcsubtotal(self,
+                      sub_level=None,
+                      sub_label='subtotal',
+                      show_sep=True,
+                      sep=' | '):
+        """ Internal helper function to calculate one level of subtotals. Do not call directly.
+
+            sub_level (int):       Grouping level to calculate subtotal. Default is max available.
+            sub_label (str):       Label override for the sub total of the group
+            show_sep  (bool):      Default is True to show subtotal levels separated by one
+                                   or more characters
+            sep (str):             Seperator for levels, defaults to |
+
+        Returns:
+            DataFrame Grand Total and Sub Total
+        """
+
+        all_levels = self._obj.index.nlevels
         output = []
         for cross_section in self._get_group_levels(sub_level):
             num_spaces = all_levels - len(cross_section)
@@ -247,5 +287,4 @@ class SideTableAccessor:
                 tuple(sub_total_label))
             output.append(section.append(subtotal))
 
-        return pd.concat(output).append(
-            self._obj.sum(numeric_only=True).rename(grand_total_label))
+        return pd.concat(output)
