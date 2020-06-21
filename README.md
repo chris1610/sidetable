@@ -4,7 +4,9 @@
 [![Pypi link](https://img.shields.io/pypi/v/sidetable.svg)](https://pypi.python.org/pypi/sidetable)
 
 sidetable is a supercharged combination of pandas `value_counts` plus `crosstab` 
-that builds simple but useful summary tables of your pandas DataFrame.
+that builds simple but useful summary tables of your pandas DataFrame. sidetable can also
+add subtotals to your DataFrame.
+
 
 Usage is straightforward. Install and `import sidetable`. Then access it through the 
 new `.stb` accessor on your DataFrame. 
@@ -37,6 +39,74 @@ You can also summarize missing values with `df.stb.missing()`:
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
 
+You can group the data and add subtotals and grand totals with `stb.subtotal()`:
+
+```python
+titanic.groupby(['sex', 'class']).agg({'fare': ['sum']}).stb.subtotal()
+```
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>fare</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th>sum</th>
+    </tr>
+    <tr>
+      <th>sex</th>
+      <th>class</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="4" valign="top">female</th>
+      <th>First</th>
+      <td>9975.8250</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>1669.7292</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>2321.1086</td>
+    </tr>
+    <tr>
+      <th>female - subtotal</th>
+      <td>13966.6628</td>
+    </tr>
+    <tr>
+      <th rowspan="4" valign="top">male</th>
+      <th>First</th>
+      <td>8201.5875</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>2132.1125</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>4393.5865</td>
+    </tr>
+    <tr>
+      <th>male - subtotal</th>
+      <td>14727.2865</td>
+    </tr>
+    <tr>
+      <th>Grand Total</th>
+      <th></th>
+      <td>28693.9493</td>
+    </tr>
+  </tbody>
+</table>
+
+
 sidetable has several useful features:
 
 * See total counts and their relative percentages in one table. This is roughly equivalent to combining the
@@ -48,11 +118,12 @@ sidetable has several useful features:
 * Provide a threshold point above which all data is grouped into a single bucket. This is useful for
   quickly identifying the areas to focus your analysis.
 * Get a count of the missing values in your data.
+* Add grand totals on any DataFrame and Subtotals to any grouped DataFrame
 
 ## Table of Contents:
 
 - [Quick Start](#quickstart)
-- [Rationals](#rationale)
+- [Rationale](#rationale)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Caveats](#caveats)
@@ -295,6 +366,137 @@ df.stb.missing(style=True)
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
 
+Another really useful function is the subtotal function. Trying to add a subtotal 
+to grouped pandas data is not easy. sidetable adds a `subtotal()` function that
+makes it very easy to add a subtotal at one or more levels of a DataFrame.
+
+The subtotal function can be applied to a simple DataFrame in order to add a Grand Total
+label:
+
+```python
+df.stb.subtotal()
+```
+
+|             |   survived |   pclass | sex    |     age |   sibsp |   parch |     fare | embarked   | class   | who   |   adult_male | deck   | embark_town   | alive   |   alone |
+|:------------|-----------:|---------:|:-------|--------:|--------:|--------:|---------:|:-----------|:--------|:------|-------------:|:-------|:--------------|:--------|--------:|
+| 887         |          1 |        1 | female |    19   |       0 |       0 |    30    | S          | First   | woman |            0 | B      | Southampton   | yes     |       1 |
+| 888         |          0 |        3 | female |   nan   |       1 |       2 |    23.45 | S          | Third   | woman |            0 | nan    | Southampton   | no      |       0 |
+| 889         |          1 |        1 | male   |    26   |       0 |       0 |    30    | C          | First   | man   |            1 | C      | Cherbourg     | yes     |       1 |
+| 890         |          0 |        3 | male   |    32   |       0 |       0 |     7.75 | Q          | Third   | man   |            1 | nan    | Queenstown    | no      |       1 |
+| Grand Total |        342 |     2057 | nan    | 21205.2 |     466 |     340 | 28693.9  | nan        | nan     | nan   |          537 | nan    | nan           | nan     |     537 |
+
+The real power of subtotal is being able to add it to one or more levels of your 
+grouped data. For example, you can group the data and add a subtotal at each level:
+
+```python
+df.groupby(['sex', 'class', 'embark_town']).agg({'fare': ['sum']}).stb.subtotal()
+```
+
+Which yields this view (truncated for simplicity):
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>fare</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th>sum</th>
+    </tr>
+    <tr>
+      <th>sex</th>
+      <th>class</th>
+      <th>embark_town</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="13" valign="top">female</th>
+      <th rowspan="4" valign="top">First</th>
+      <th>Cherbourg</th>
+      <td>4972.5333</td>
+    </tr>
+    <tr>
+      <th>Queenstown</th>
+      <td>90.0000</td>
+    </tr>
+    <tr>
+      <th>Southampton</th>
+      <td>4753.2917</td>
+    </tr>
+    <tr>
+      <th>female | First - subtotal</th>
+      <td>9815.8250</td>
+    </tr>
+    <tr>
+      <th rowspan="4" valign="top">Second</th>
+      <th>Cherbourg</th>
+      <td>176.8792</td>
+    </tr>
+    <tr>
+      <th>Queenstown</th>
+      <td>24.7000</td>
+    </tr>
+    <tr>
+      <th>Southampton</th>
+      <td>1468.1500</td>
+    </tr>
+    <tr>
+      <th>female | Second - subtotal</th>
+      <td>1669.7292</td>
+    </tr>
+    <tr>
+      <th rowspan="4" valign="top">Third</th>
+      <th>Cherbourg</th>
+      <td>337.9833</td>
+    </tr>
+    <tr>
+      <th>Queenstown</th>
+      <td>340.1585</td>
+    </tr>
+    <tr>
+      <th>Southampton</th>
+      <td>1642.9668</td>
+    </tr>
+    <tr>
+      <th>female | Third - subtotal</th>
+      <td>2321.1086</td>
+    </tr>
+    <tr>
+      <th>female - subtotal</th>
+      <th></th>
+      <td>13806.6628</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">male</th>
+      <th rowspan="2" valign="top">First</th>
+      <th>Cherbourg</th>
+      <td>3928.5417</td>
+    </tr>
+    <tr>
+      <th>Queenstown</th>
+      <td>90.0000</td>
+    </tr>
+  </tbody>
+</table>
+
+By default, every level in the DataFrame will be subtotaled but you can control this behavior
+by using the `sub_level` argument. For instance, you can subtotal on `sex` and `class` by 
+passing the argument `sub_level=[1,2]`
+
+```python
+summary_table = df.groupby(['sex', 'class', 'embark_town']).agg({'fare': ['sum']})
+summary_table.stb.subtotal(sub_level=[1, 2])
+```
+
+The `subtotal` function also allows the user to configure the labels and separators used in 
+the subtotal and Grand Total. 
 
 ## Caveats
 sidetable supports grouping on any data type in a pandas DataFrame. This means that
@@ -412,6 +614,9 @@ df.stb.freq(['deck', 'class'], clip_0=False)
 
 In many cases this might be too much data, but sometimes the fact that a combination is 
 missing could be insightful.
+
+With the subtotal function, sidetable convert a Categorical MultiIndex to a plain index
+in order to easily add the subtotal labels.
 
 ## TODO
 

@@ -27,7 +27,9 @@ class SideTableAccessor:
              other_label='Others',
              clip_0=True,
              value=None,
-             style=False):
+             style=False,
+             sort_cols=False,
+             cum_cols=True):
         """ Create a table that counts the frequency of occurrence or summation of values
         for one or more columns of data. Table is sorted and includes cumulative
         values which can be useful for identifying a cutoff.
@@ -46,7 +48,11 @@ class SideTableAccessor:
             clip_0 (bool):     In cases where 0 counts are generated, remove them from the list
             value (str):       Column that will be summed. If provided, summation is done
                                instead of counting each entry
-            style (bool):     Apply a pandas style to format percentages
+            style (bool):      Apply a pandas style to format percentages
+            sort_cols (bool):  By default False, will sort on numeric results.
+                               If True, will sort based on column values.
+            cum_cols (bool):   Default is True and will include Cumulative Count and Cumulative 
+                               Percent. Set to False and these columns will not be returned
 
         Returns:
             Dataframe that summarizes the number of occurrences of each value in the provided
@@ -80,9 +86,14 @@ class SideTableAccessor:
             group_data = self._obj.groupby(cols).size().reset_index(
                 name=col_name)
 
-        # Sort the results and cleanup the index
-        results = group_data.sort_values(
-            [col_name] + cols, ascending=False).reset_index(drop=True)
+        # Sort the results either by the grouped column(s) or numeric values
+        # cleanup the index
+        if sort_cols:
+            results = group_data.sort_values(
+                cols, ascending=True).reset_index(drop=True)
+        else:
+            results = group_data.sort_values(
+                [col_name] + cols, ascending=False).reset_index(drop=True)
 
         # In data with null values, can include 0 counts filter them out by default
         if clip_0:
@@ -121,7 +132,11 @@ class SideTableAccessor:
             results = results[results['Others'] == False].append(
                 all_others, ignore_index=True).drop(columns=['Others']).fillna(
                     dict.fromkeys(cols, other_label))
-
+        if not cum_cols:
+            results = results.drop(columns=[
+                col_name, 'Cumulative Percent',
+                f'Cumulative {col_name}'
+            ])
         if style:
             format_dict = {
                 'Percent': '{:.2%}',
@@ -185,12 +200,12 @@ class SideTableAccessor:
                  sub_label='subtotal',
                  show_sep=True,
                  sep=' | '):
-        """ Add subtotals to a DataFrame. If the DataFrame has a multi-index, will
+        """ Add a numeric subtotals to a DataFrame. If the DataFrame has a multi-index, will
         add a subtotal at all levels defined in sub_level as well as a Grand Total
 
             sub_level (int or list): Grouping level to calculate subtotal. Default is max
                                      available. Can pass a single integer or a list of valid
-                                     levels
+                                     levels.
             grand_label (str):       Label override for the total of the entire DataFrame
             sub_label (str):         Label override for the sub total of the group
             show_sep  (bool):        Default is True to show subtotal levels separated by one
@@ -227,7 +242,6 @@ class SideTableAccessor:
             # Add the Grand Total label at the end
             return self._obj.append(
                 self._obj.sum(numeric_only=True).rename(grand_total_label[0]))
-            # Need to do this check after processing DataFrame with no levels
 
         # Check that list is in the appropriate range
         if sub_calc_list[0] <= 0 or sub_calc_list[-1] > all_levels - 1:
@@ -242,10 +256,10 @@ class SideTableAccessor:
         subtotal_levels = []
         # Calculate the subtotal at each level given
         for i in sub_calc_list:
-            level_result = self._calcsubtotal(sub_level=i,
-                                              sub_label=sub_label,
-                                              show_sep=show_sep,
-                                              sep=sep)
+            level_result = self._calc_subtotal(sub_level=i,
+                                               sub_label=sub_label,
+                                               show_sep=show_sep,
+                                               sep=sep)
             subtotal_levels.append(level_result)
 
         # Use combine first to join all the individual levels together into a single
@@ -254,11 +268,11 @@ class SideTableAccessor:
         return results.append(
             self._obj.sum(numeric_only=True).rename(grand_total_label))
 
-    def _calcsubtotal(self,
-                      sub_level=None,
-                      sub_label='subtotal',
-                      show_sep=True,
-                      sep=' | '):
+    def _calc_subtotal(self,
+                       sub_level=None,
+                       sub_label='subtotal',
+                       show_sep=True,
+                       sep=' | '):
         """ Internal helper function to calculate one level of subtotals. Do not call directly.
 
             sub_level (int):       Grouping level to calculate subtotal. Default is max available.
@@ -268,12 +282,15 @@ class SideTableAccessor:
             sep (str):             Seperator for levels, defaults to |
 
         Returns:
-            DataFrame Grand Total and Sub Total
+            DataFrame Sub Total
         """
 
         all_levels = self._obj.index.nlevels
         output = []
+        # Get the total for each cross section of the multi-index
         for cross_section in self._get_group_levels(sub_level):
+            # Need to have blank spaces in label names so that all results will
+            # line up correctly
             num_spaces = all_levels - len(cross_section)
             if show_sep:
                 total_label = sep.join(cross_section) + f' - {sub_label}'
@@ -282,6 +299,7 @@ class SideTableAccessor:
             sub_total_label = list(cross_section[0:sub_level]) + [
                 total_label
             ] + [' '] * num_spaces
+            # Pull out the actual section and total it
             section = self._obj.xs(cross_section, drop_level=False)
             subtotal = section.sum(numeric_only=True).rename(
                 tuple(sub_total_label))

@@ -34,11 +34,21 @@ def test_double_group(titanic):
 
 
 def test_values(titanic):
-    """ Summ the values of the fares
+    """ Sum the values of the fares
     """
     table = titanic.stb.freq(['embark_town', 'class'], value='fare')
     assert table.count()['class'] == 9
 
+def test_sorting(titanic):
+    """ Sum the values of the fares and sort based on columns
+
+    """
+    table = titanic.stb.freq(['embark_town', 'class'], value='fare', sort_cols=True)
+    assert table.shape == (9, 6)
+    assert table.iloc[-1,0] == 'Southampton'
+
+    table = titanic.stb.freq(['embark_town', 'class'], value='fare', cum_cols=False, sort_cols=True)
+    assert table.shape == (9,3)
 
 def test_clipping(titanic):
     """Make sure we can show all the values
