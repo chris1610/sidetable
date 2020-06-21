@@ -110,6 +110,6 @@ A reminder for the maintainers on how to deploy.
 Make sure all your changes are committed (including an entry in HISTORY.md).
 
 ```python
-python setup.py sdist
+python setup.py sdist bdist_wheel
 twine upload dist/* --verbose
 ```

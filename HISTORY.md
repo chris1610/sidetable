@@ -11,4 +11,4 @@
 
 # 0.1.0 (2020-05-26)
 - Initial release
-* First release on PyPI.
+- First release on PyPI.
