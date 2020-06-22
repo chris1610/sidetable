@@ -50,11 +50,10 @@ setup(
     keywords='sidetable',
     name='sidetable',
     packages=find_packages(include=['sidetable']),
-    setup_requires=['flake8'],
     python_requires='>=3.6',
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/chris1610/sidetable',
-    version='0.4.0',
+    version='0.5.0(dev)',
     zip_safe=False,
 )

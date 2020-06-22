@@ -1,5 +1,7 @@
 # History
 
+# 0.5.0 (Dev)
+
 # 0.4.0 (2020-06-21)
 - Adding a subtotal function
 - Allow sorting by column values in freq table

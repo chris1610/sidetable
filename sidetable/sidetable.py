@@ -11,6 +11,8 @@ class SideTableAccessor:
     Computes a frequency table on one or more columns with df.stb.freq(['col_name'])
     Compute a table of missing values with df.stb.missing()
     """
+    SORT_FLAG = '~~~~zz'
+
     def __init__(self, pandas_obj):
         self._validate(pandas_obj)
         self._obj = pandas_obj
@@ -51,7 +53,7 @@ class SideTableAccessor:
             style (bool):      Apply a pandas style to format percentages
             sort_cols (bool):  By default False, will sort on numeric results.
                                If True, will sort based on column values.
-            cum_cols (bool):   Default is True and will include Cumulative Count and Cumulative 
+            cum_cols (bool):   Default is True and will include Cumulative Count and Cumulative
                                Percent. Set to False and these columns will not be returned
 
         Returns:
@@ -133,10 +135,8 @@ class SideTableAccessor:
                 all_others, ignore_index=True).drop(columns=['Others']).fillna(
                     dict.fromkeys(cols, other_label))
         if not cum_cols:
-            results = results.drop(columns=[
-                col_name, 'Cumulative Percent',
-                f'Cumulative {col_name}'
-            ])
+            results = results.drop(
+                columns=['Cumulative Percent', f'Cumulative {col_name}'])
         if style:
             format_dict = {
                 'Percent': '{:.2%}',
@@ -194,6 +194,27 @@ class SideTableAccessor:
                 results += [x]
         return results
 
+    def _clean_labels(self, multi_index):
+        """ Remove flags on the subtotal labels that are used to enforce sorting. This
+        is an internal function
+
+        Args:
+            multi_index (pandas multi-index): Multi Index that includes the subtotal ordering
+                                              text
+        """
+        master_list = []
+        names = list(multi_index.names)
+        for index_item in multi_index:
+            sub_list = []
+            for level in index_item:
+                if level.startswith(self.SORT_FLAG):
+                    level_val = level[len(self.SORT_FLAG):]
+                else:
+                    level_val = level
+                sub_list.append(level_val)
+            master_list.append(tuple(sub_list))
+        return pd.MultiIndex.from_tuples(tuple(master_list), names=names)
+
     def subtotal(self,
                  sub_level=None,
                  grand_label='Grand Total',
@@ -217,6 +238,9 @@ class SideTableAccessor:
         """
         all_levels = self._obj.index.nlevels
 
+        # Validate seperator is a string
+        if not isinstance(sep, str):
+            raise AttributeError('sep must be a string')
         # No value is specified, use the maximum
         if sub_level is None:
             sub_calc_list = list(range(1, all_levels))
@@ -265,6 +289,10 @@ class SideTableAccessor:
         # Use combine first to join all the individual levels together into a single
         # DataFrame
         results = reduce(lambda l, r: l.combine_first(r), subtotal_levels)
+
+        # Remove the subtotal sorting values
+        results.index = self._clean_labels(results.index)
+        # Final step is to add Grand total
         return results.append(
             self._obj.sum(numeric_only=True).rename(grand_total_label))
 
@@ -293,9 +321,10 @@ class SideTableAccessor:
             # line up correctly
             num_spaces = all_levels - len(cross_section)
             if show_sep:
-                total_label = sep.join(cross_section) + f' - {sub_label}'
+                total_label = self.SORT_FLAG + sep.join(
+                    cross_section) + f' - {sub_label}'
             else:
-                total_label = f'{sub_label}'
+                total_label = self.SORT_FLAG + f'{sub_label}'
             sub_total_label = list(cross_section[0:sub_level]) + [
                 total_label
             ] + [' '] * num_spaces

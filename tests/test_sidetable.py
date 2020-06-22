@@ -48,7 +48,7 @@ def test_sorting(titanic):
     assert table.iloc[-1,0] == 'Southampton'
 
     table = titanic.stb.freq(['embark_town', 'class'], value='fare', cum_cols=False, sort_cols=True)
-    assert table.shape == (9,3)
+    assert table.shape == (9,4)
 
 def test_clipping(titanic):
     """Make sure we can show all the values
