@@ -42,7 +42,7 @@ You can also summarize missing values with `df.stb.missing()`:
 You can group the data and add subtotals and grand totals with `stb.subtotal()`:
 
 ```python
-titanic.groupby(['sex', 'class']).agg({'fare': ['sum']}).stb.subtotal()
+df.groupby(['sex', 'class']).agg({'fare': ['sum']}).stb.subtotal()
 ```
 
 <table border="1" class="dataframe">
@@ -118,7 +118,7 @@ sidetable has several useful features:
 * Provide a threshold point above which all data is grouped into a single bucket. This is useful for
   quickly identifying the areas to focus your analysis.
 * Get a count of the missing values in your data.
-* Add grand totals on any DataFrame and Subtotals to any grouped DataFrame
+* Add grand totals on any DataFrame and subtotals to any grouped DataFrame
 
 ## Table of Contents:
 
@@ -150,6 +150,9 @@ df.stb.freq(['column1', 'column2'])
 
 # See what data is missing
 df.stb.missing()
+
+# Group data and add a subtotal
+df.groupby(['column1', 'column2'])['col3'].sum().stb.subtotal()
 ```
 That's it. 
 
@@ -366,9 +369,9 @@ df.stb.missing(style=True)
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
 
-Another really useful function is the subtotal function. Trying to add a subtotal 
+Another useful function is the subtotal function. Trying to add a subtotal 
 to grouped pandas data is not easy. sidetable adds a `subtotal()` function that
-makes it very easy to add a subtotal at one or more levels of a DataFrame.
+makes adds a subtotal at one or more levels of a DataFrame.
 
 The subtotal function can be applied to a simple DataFrame in order to add a Grand Total
 label:
@@ -496,7 +499,8 @@ summary_table.stb.subtotal(sub_level=[1, 2])
 ```
 
 The `subtotal` function also allows the user to configure the labels and separators used in 
-the subtotal and Grand Total. 
+the subtotal and Grand Total by using the `grand_label`, `sub_label`, `show_sep` and `sep`
+arguments. 
 
 ## Caveats
 sidetable supports grouping on any data type in a pandas DataFrame. This means that

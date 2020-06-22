@@ -1,7 +1,9 @@
 # History
 
-# 0.4.0 (Development)
+# 0.4.0 (2020-06-21)
 - Adding a subtotal function
+- Allow sorting by column values in freq table
+- Add flag to drop cumulative count and frequency if they are not needed
 
 # 0.3.0 (2020-05-31)
 - First public release

@@ -35,7 +35,7 @@ setup(
     author="Chris Moffitt",
     author_email='chris@moffitts.net',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
@@ -55,6 +55,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/chris1610/sidetable',
-    version='0.4.dev',
+    version='0.4.0',
     zip_safe=False,
 )
