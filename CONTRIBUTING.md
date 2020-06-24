@@ -9,7 +9,7 @@ You can contribute in many ways:
 
 #### Report Bugs
 
-Report bugs at [here](https://github.com/chris1610/sidetable/issues).
+Report bugs [here](https://github.com/chris1610/sidetable/issues).
 
 If you are reporting a bug, please include:
 
