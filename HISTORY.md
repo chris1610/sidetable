@@ -1,5 +1,7 @@
 # History
 
+# 0.6.0 (Dev)
+
 # 0.5.0 (2020-06-22)
 - Subtotal sorting was not working consistently. Fixed
 - Dropping cumulative count and percent was broken. Fixed
