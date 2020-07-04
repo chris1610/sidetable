@@ -26,7 +26,7 @@ class SideTableAccessor:
     def freq(self,
              cols,
              thresh=100,
-             other_label='Others',
+             other_label='others',
              clip_0=True,
              value=None,
              style=False,
@@ -114,12 +114,12 @@ class SideTableAccessor:
         # others category
         if thresh < 100:
             # Flag the All Other rows
-            results['others'] = False
+            results[other_label] = False
             results.loc[results['cumulative_percent'] > thresh,
-                        'others'] = True
+                        other_label] = True
 
             # Calculate the total amount and percentage of the others
-            other_total = results.loc[results['others'], col_name].sum()
+            other_total = results.loc[results[other_label], col_name].sum()
             other_pct = (other_total / total) * 100
 
             # Create the footer row to append to the results
@@ -131,8 +131,8 @@ class SideTableAccessor:
             })
 
             # Add the footer row, remove the Others column and rename the placeholder
-            results = results[results['others'] == False].append(
-                all_others, ignore_index=True).drop(columns=['others']).fillna(
+            results = results[results[other_label] == False].append(
+                all_others, ignore_index=True).drop(columns=[other_label]).fillna(
                     dict.fromkeys(cols, other_label))
         if not cum_cols:
             results = results.drop(

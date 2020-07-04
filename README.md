@@ -13,31 +13,31 @@ new `.stb` accessor on your DataFrame.
 
 For the Titanic data: `df.stb.freq(['class'])` will build a frequency table like this:
 
-|    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:--------|--------:|----------:|-------------------:|---------------------:|
-|  0 | Third   |     491 |  0.551066 |                491 |             0.551066 |
-|  1 | First   |     216 |  0.242424 |                707 |             0.79349  |
-|  2 | Second  |     184 |  0.20651  |                891 |             1        |
+|  0 | Third   |     491 |   55.1066 |                491 |              55.1066 |
+|  1 | First   |     216 |   24.2424 |                707 |              79.349  |
+|  2 | Second  |     184 |   20.651  |                891 |             100      |
 
 You can also summarize missing values with `df.stb.missing()`:
 
-|             |   Missing |   Total |    Percent |
-|:------------|----------:|--------:|-----------:|
-| deck        |       688 |     891 | 0.772166   |
-| age         |       177 |     891 | 0.198653   |
-| embarked    |         2 |     891 | 0.00224467 |
-| embark_town |         2 |     891 | 0.00224467 |
-| survived    |         0 |     891 | 0          |
-| pclass      |         0 |     891 | 0          |
-| sex         |         0 |     891 | 0          |
-| sibsp       |         0 |     891 | 0          |
-| parch       |         0 |     891 | 0          |
-| fare        |         0 |     891 | 0          |
-| class       |         0 |     891 | 0          |
-| who         |         0 |     891 | 0          |
-| adult_male  |         0 |     891 | 0          |
-| alive       |         0 |     891 | 0          |
-| alone       |         0 |     891 | 0          |
+|             |   missing |   total |   percent |
+|:------------|----------:|--------:|----------:|
+| deck        |       688 |     891 | 77.2166   |
+| age         |       177 |     891 | 19.8653   |
+| embarked    |         2 |     891 |  0.224467 |
+| embark_town |         2 |     891 |  0.224467 |
+| survived    |         0 |     891 |  0        |
+| pclass      |         0 |     891 |  0        |
+| sex         |         0 |     891 |  0        |
+| sibsp       |         0 |     891 |  0        |
+| parch       |         0 |     891 |  0        |
+| fare        |         0 |     891 |  0        |
+| class       |         0 |     891 |  0        |
+| who         |         0 |     891 |  0        |
+| adult_male  |         0 |     891 |  0        |
+| alive       |         0 |     891 |  0        |
+| alone       |         0 |     891 |  0        |
 
 You can group the data and add subtotals and grand totals with `stb.subtotal()`:
 
@@ -99,7 +99,7 @@ df.groupby(['sex', 'class']).agg({'fare': ['sum']}).stb.subtotal()
       <td>14727.2865</td>
     </tr>
     <tr>
-      <th>Grand Total</th>
+      <th>grand_total</th>
       <th></th>
       <td>28693.9493</td>
     </tr>
@@ -228,25 +228,24 @@ Which can be done, but is messy and a lot of typing and remembering:
 
 ```python
 pd.concat([df['class'].value_counts().rename('count'), 
-        df['class'].value_counts(normalize=True).rename('percentage')], axis=1)
+        df['class'].value_counts(normalize=True).mul(100).rename('percentage')], axis=1)
 ```
 |        |   count |   percentage |
 |:-------|--------:|-------------:|
-| Third  |     491 |     0.551066 |
-| First  |     216 |     0.242424 |
-| Second |     184 |     0.20651  |
+| Third  |     491 |      55.1066 |
+| First  |     216 |      24.2424 |
+| Second |     184 |      20.651  |
 
 Using sidetable is much simpler and you get cumulative totals, percents and more flexibility:
 
 ```python
 df.stb.freq(['class'])
 ```
-
-|    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:--------|--------:|----------:|-------------------:|---------------------:|
-|  0 | Third   |     491 |  0.551066 |                491 |             0.551066 |
-|  1 | First   |     216 |  0.242424 |                707 |             0.79349  |
-|  2 | Second  |     184 |  0.20651  |                891 |             1        |
+|  0 | Third   |     491 |   55.1066 |                491 |              55.1066 |
+|  1 | First   |     216 |   24.2424 |                707 |              79.349  |
+|  2 | Second  |     184 |   20.651  |                891 |             100      |
 
 If you want to style the results so percentages and large numbers are easier to read, 
 use `style=True`:
@@ -254,7 +253,7 @@ use `style=True`:
 ```python
 df.stb.freq(['class'], style=True)
 ```
-|    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:--------|--------:|----------:|-------------------:|---------------------:|
 |  0 | Third   |     491 |  55.11%   |                491 |               55.11% |
 |  1 | First   |     216 |  24.24%   |                707 |               79.35% |
@@ -268,14 +267,14 @@ class and sex:
 ```python
 df.stb.freq(['sex', 'class'])
 ```
-|    | sex    | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | sex    | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
-|  0 | male   | Third   |     347 | 0.38945   |                347 |             0.38945  |
-|  1 | female | Third   |     144 | 0.161616  |                491 |             0.551066 |
-|  2 | male   | First   |     122 | 0.136925  |                613 |             0.687991 |
-|  3 | male   | Second  |     108 | 0.121212  |                721 |             0.809203 |
-|  4 | female | First   |      94 | 0.105499  |                815 |             0.914703 |
-|  5 | female | Second  |      76 | 0.0852974 |                891 |             1        |
+|  0 | male   | Third   |     347 |  38.945   |                347 |              38.945  |
+|  1 | female | Third   |     144 |  16.1616  |                491 |              55.1066 |
+|  2 | male   | First   |     122 |  13.6925  |                613 |              68.7991 |
+|  3 | male   | Second  |     108 |  12.1212  |                721 |              80.9203 |
+|  4 | female | First   |      94 |  10.5499  |                815 |              91.4703 |
+|  5 | female | Second  |      76 |   8.52974 |                891 |             100      |
 
 You can use as many groupings as you would like.
 
@@ -286,39 +285,39 @@ For this data set, we can see how the fares are distributed by class:
 ```python
 df.stb.freq(['class'], value='fare')
 ```
-|    | class   |     fare |   Percent |   Cumulative fare |   Cumulative Percent |
+|    | class   |     fare |   percent |   cumulative_fare |   cumulative_percent |
 |---:|:--------|---------:|----------:|------------------:|---------------------:|
-|  0 | First   | 18177.4  |  0.633493 |           18177.4 |             0.633493 |
-|  1 | Third   |  6714.7  |  0.234011 |           24892.1 |             0.867504 |
-|  2 | Second  |  3801.84 |  0.132496 |           28693.9 |             1        |
+|  0 | First   | 18177.4  |   63.3493 |           18177.4 |              63.3493 |
+|  1 | Third   |  6714.7  |   23.4011 |           24892.1 |              86.7504 |
+|  2 | Second  |  3801.84 |   13.2496 |           28693.9 |             100      |
 
 Another feature of sidetable is that you can specify a threshold. For many data analysis,
 you may want to break down into large groupings to focus on and ignore others. You can use
 the `thresh` argument to define a threshold and group all entries above that threshold 
-into an "Other" grouping:
+into an "other" grouping:
 
 ```python
-df.stb.freq(['class', 'who'], value='fare', thresh=.80)
+df.stb.freq(['class', 'who'], value='fare', thresh=80)
 ```
-|    | class   | who    |    fare |   Percent |   Cumulative fare |   Cumulative Percent |
+|    | class   | who    |    fare |   percent |   cumulative_fare |   cumulative_percent |
 |---:|:--------|:-------|--------:|----------:|------------------:|---------------------:|
-|  0 | First   | woman  | 9492.94 | 0.330834  |           9492.94 |             0.330834 |
-|  1 | First   | man    | 7848.18 | 0.273513  |          17341.1  |             0.604348 |
-|  2 | Third   | man    | 3617.53 | 0.126073  |          20958.6  |             0.73042  |
-|  3 | Second  | man    | 1886.36 | 0.0657406 |          22845    |             0.796161 |
-|  4 | Others  | Others | 5848.95 | 0.203839  |          28693.9  |             1        |
+|  0 | First   | woman  | 9492.94 |  33.0834  |           9492.94 |              33.0834 |
+|  1 | First   | man    | 7848.18 |  27.3513  |          17341.1  |              60.4348 |
+|  2 | Third   | man    | 3617.53 |  12.6073  |          20958.6  |              73.042  |
+|  3 | Second  | man    | 1886.36 |   6.57406 |          22845    |              79.6161 |
+|  4 | others  | others | 5848.95 |  20.3839  |          28693.9  |             100      |
 
 You can further customize by specifying the label to use for all the others:
 ```python
-df.stb.freq(['class', 'who'], value='fare', thresh=.80, other_label='All others')
+df.stb.freq(['class', 'who'], value='fare', thresh=80, other_label='All others')
 ```
-|    | class      | who        |    fare |   Percent |   Cumulative fare |   Cumulative Percent |
+|    | class      | who        |    fare |   percent |   cumulative_fare |   cumulative_percent |
 |---:|:-----------|:-----------|--------:|----------:|------------------:|---------------------:|
-|  0 | First      | woman      | 9492.94 | 0.330834  |           9492.94 |             0.330834 |
-|  1 | First      | man        | 7848.18 | 0.273513  |          17341.1  |             0.604348 |
-|  2 | Third      | man        | 3617.53 | 0.126073  |          20958.6  |             0.73042  |
-|  3 | Second     | man        | 1886.36 | 0.0657406 |          22845    |             0.796161 |
-|  4 | All others | All others | 5848.95 | 0.203839  |          28693.9  |             1        |
+|  0 | First      | woman      | 9492.94 |  33.0834  |           9492.94 |              33.0834 |
+|  1 | First      | man        | 7848.18 |  27.3513  |          17341.1  |              60.4348 |
+|  2 | Third      | man        | 3617.53 |  12.6073  |          20958.6  |              73.042  |
+|  3 | Second     | man        | 1886.36 |   6.57406 |          22845    |              79.6161 |
+|  4 | All others | All others | 5848.95 |  20.3839  |          28693.9  |             100      |
 
 Finally, sidetable includes a summary table that shows the missing values in
 your data by count and percentage of total missing values in a column.
@@ -326,23 +325,23 @@ your data by count and percentage of total missing values in a column.
 ```python
 df.stb.missing()
 ```
-|             |   Missing |   Total |    Percent |
-|:------------|----------:|--------:|-----------:|
-| deck        |       688 |     891 | 0.772166   |
-| age         |       177 |     891 | 0.198653   |
-| embarked    |         2 |     891 | 0.00224467 |
-| embark_town |         2 |     891 | 0.00224467 |
-| survived    |         0 |     891 | 0          |
-| pclass      |         0 |     891 | 0          |
-| sex         |         0 |     891 | 0          |
-| sibsp       |         0 |     891 | 0          |
-| parch       |         0 |     891 | 0          |
-| fare        |         0 |     891 | 0          |
-| class       |         0 |     891 | 0          |
-| who         |         0 |     891 | 0          |
-| adult_male  |         0 |     891 | 0          |
-| alive       |         0 |     891 | 0          |
-| alone       |         0 |     891 | 0          |
+|             |   missing |   total |   percent |
+|:------------|----------:|--------:|----------:|
+| deck        |       688 |     891 | 77.2166   |
+| age         |       177 |     891 | 19.8653   |
+| embarked    |         2 |     891 |  0.224467 |
+| embark_town |         2 |     891 |  0.224467 |
+| survived    |         0 |     891 |  0        |
+| pclass      |         0 |     891 |  0        |
+| sex         |         0 |     891 |  0        |
+| sibsp       |         0 |     891 |  0        |
+| parch       |         0 |     891 |  0        |
+| fare        |         0 |     891 |  0        |
+| class       |         0 |     891 |  0        |
+| who         |         0 |     891 |  0        |
+| adult_male  |         0 |     891 |  0        |
+| alive       |         0 |     891 |  0        |
+| alone       |         0 |     891 |  0        |
 
 If you wish to see the results with styles applied to the Percent and Total column,
 use:
@@ -351,7 +350,7 @@ use:
 df.stb.missing(style=True)
 ```
 
-|             |   Missing |   Total |    Percent |
+|             |   missing |   total |    percent |
 |:------------|----------:|--------:|-----------:|
 | deck        |       688 |     891 | 77.25%     |
 | age         |       177 |     891 | 19.87%     |
@@ -386,7 +385,7 @@ df.stb.subtotal()
 | 888         |          0 |        3 | female |   nan   |       1 |       2 |    23.45 | S          | Third   | woman |            0 | nan    | Southampton   | no      |       0 |
 | 889         |          1 |        1 | male   |    26   |       0 |       0 |    30    | C          | First   | man   |            1 | C      | Cherbourg     | yes     |       1 |
 | 890         |          0 |        3 | male   |    32   |       0 |       0 |     7.75 | Q          | Third   | man   |            1 | nan    | Queenstown    | no      |       1 |
-| Grand Total |        342 |     2057 | nan    | 21205.2 |     466 |     340 | 28693.9  | nan        | nan     | nan   |          537 | nan    | nan           | nan     |     537 |
+| grand_total |        342 |     2057 | nan    | 21205.2 |     466 |     340 | 28693.9  | nan        | nan     | nan   |          537 | nan    | nan           | nan     |     537 |
 
 The real power of subtotal is being able to add it to one or more levels of your 
 grouped data. For example, you can group the data and add a subtotal at each level:
@@ -553,38 +552,34 @@ has a categorical value for `deck` so using `fillna` requires and extra step:
 df['deck_fillna'] = df['deck'].cat.add_categories('UNK').fillna('UNK')
 df.stb.freq(['deck_fillna'])
 ```
-|    | deck_fillna   |   Count |    Percent |   Cumulative Count |   Cumulative Percent |
-|---:|:--------------|--------:|-----------:|-------------------:|---------------------:|
-|  0 | UNK           |     688 | 0.772166   |                688 |             0.772166 |
-|  1 | C             |      59 | 0.0662177  |                747 |             0.838384 |
-|  2 | B             |      47 | 0.0527497  |                794 |             0.891134 |
-|  3 | D             |      33 | 0.037037   |                827 |             0.928171 |
-|  4 | E             |      32 | 0.0359147  |                859 |             0.964085 |
-|  5 | A             |      15 | 0.016835   |                874 |             0.98092  |
-|  6 | F             |      13 | 0.0145903  |                887 |             0.995511 |
-|  7 | G             |       4 | 0.00448934 |                891 |             1        |
+|    | fare_bin   |   count |   percent |   cumulative_count |   cumulative_percent |
+|---:|:-----------|--------:|----------:|-------------------:|---------------------:|
+|  0 | medium     |     224 |   25.1403 |                224 |              25.1403 |
+|  1 | low        |     223 |   25.0281 |                447 |              50.1684 |
+|  2 | x-high     |     222 |   24.9158 |                669 |              75.0842 |
+|  3 | high       |     222 |   24.9158 |                891 |             100      |
 
-Another variant of this is that there might be certain groupings where there are no
-valid counts.
+Another variant is that there might be certain groupings where there are no valid counts.
 
 For instance, if we look at the `deck` and `class`:
 
 ```python
 df.stb.freq(['deck', 'class'])
 ```
-|    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | deck   | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
-|  0 | C      | First   |      59 | 0.29064   |                 59 |             0.29064  |
-|  1 | B      | First   |      47 | 0.231527  |                106 |             0.522167 |
-|  2 | D      | First   |      29 | 0.142857  |                135 |             0.665025 |
-|  3 | E      | First   |      25 | 0.123153  |                160 |             0.788177 |
-|  4 | A      | First   |      15 | 0.0738916 |                175 |             0.862069 |
-|  5 | F      | Second  |       8 | 0.0394089 |                183 |             0.901478 |
-|  6 | F      | Third   |       5 | 0.0246305 |                188 |             0.926108 |
-|  7 | G      | Third   |       4 | 0.0197044 |                192 |             0.945813 |
-|  8 | E      | Second  |       4 | 0.0197044 |                196 |             0.965517 |
-|  9 | D      | Second  |       4 | 0.0197044 |                200 |             0.985222 |
-| 10 | E      | Third   |       3 | 0.0147783 |                203 |             1        |
+|  0 | C      | First   |      59 |  29.064   |                 59 |              29.064  |
+|  1 | B      | First   |      47 |  23.1527  |                106 |              52.2167 |
+|  2 | D      | First   |      29 |  14.2857  |                135 |              66.5025 |
+|  3 | E      | First   |      25 |  12.3153  |                160 |              78.8177 |
+|  4 | A      | First   |      15 |   7.38916 |                175 |              86.2069 |
+|  5 | F      | Second  |       8 |   3.94089 |                183 |              90.1478 |
+|  6 | F      | Third   |       5 |   2.46305 |                188 |              92.6108 |
+|  7 | G      | Third   |       4 |   1.97044 |                192 |              94.5813 |
+|  8 | E      | Second  |       4 |   1.97044 |                196 |              96.5517 |
+|  9 | D      | Second  |       4 |   1.97044 |                200 |              98.5222 |
+| 10 | E      | Third   |       3 |   1.47783 |                203 |             100      |
+
 
 There are only 11 combinations. If we want to see all - even if there are not any passengers
 fitting that criteria, use `clip_0=False` 
@@ -592,29 +587,29 @@ fitting that criteria, use `clip_0=False`
 ```python
 df.stb.freq(['deck', 'class'], clip_0=False)
 ```
-|    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | deck   | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
-|  0 | C      | First   |      59 | 0.29064   |                 59 |             0.29064  |
-|  1 | B      | First   |      47 | 0.231527  |                106 |             0.522167 |
-|  2 | D      | First   |      29 | 0.142857  |                135 |             0.665025 |
-|  3 | E      | First   |      25 | 0.123153  |                160 |             0.788177 |
-|  4 | A      | First   |      15 | 0.0738916 |                175 |             0.862069 |
-|  5 | F      | Second  |       8 | 0.0394089 |                183 |             0.901478 |
-|  6 | F      | Third   |       5 | 0.0246305 |                188 |             0.926108 |
-|  7 | G      | Third   |       4 | 0.0197044 |                192 |             0.945813 |
-|  8 | E      | Second  |       4 | 0.0197044 |                196 |             0.965517 |
-|  9 | D      | Second  |       4 | 0.0197044 |                200 |             0.985222 |
-| 10 | E      | Third   |       3 | 0.0147783 |                203 |             1        |
-| 11 | G      | Second  |       0 | 0         |                203 |             1        |
-| 12 | G      | First   |       0 | 0         |                203 |             1        |
-| 13 | F      | First   |       0 | 0         |                203 |             1        |
-| 14 | D      | Third   |       0 | 0         |                203 |             1        |
-| 15 | C      | Third   |       0 | 0         |                203 |             1        |
-| 16 | C      | Second  |       0 | 0         |                203 |             1        |
-| 17 | B      | Third   |       0 | 0         |                203 |             1        |
-| 18 | B      | Second  |       0 | 0         |                203 |             1        |
-| 19 | A      | Third   |       0 | 0         |                203 |             1        |
-| 20 | A      | Second  |       0 | 0         |                203 |             1        |
+|  0 | C      | First   |      59 |  29.064   |                 59 |              29.064  |
+|  1 | B      | First   |      47 |  23.1527  |                106 |              52.2167 |
+|  2 | D      | First   |      29 |  14.2857  |                135 |              66.5025 |
+|  3 | E      | First   |      25 |  12.3153  |                160 |              78.8177 |
+|  4 | A      | First   |      15 |   7.38916 |                175 |              86.2069 |
+|  5 | F      | Second  |       8 |   3.94089 |                183 |              90.1478 |
+|  6 | F      | Third   |       5 |   2.46305 |                188 |              92.6108 |
+|  7 | G      | Third   |       4 |   1.97044 |                192 |              94.5813 |
+|  8 | E      | Second  |       4 |   1.97044 |                196 |              96.5517 |
+|  9 | D      | Second  |       4 |   1.97044 |                200 |              98.5222 |
+| 10 | E      | Third   |       3 |   1.47783 |                203 |             100      |
+| 11 | G      | Second  |       0 |   0       |                203 |             100      |
+| 12 | G      | First   |       0 |   0       |                203 |             100      |
+| 13 | F      | First   |       0 |   0       |                203 |             100      |
+| 14 | D      | Third   |       0 |   0       |                203 |             100      |
+| 15 | C      | Third   |       0 |   0       |                203 |             100      |
+| 16 | C      | Second  |       0 |   0       |                203 |             100      |
+| 17 | B      | Third   |       0 |   0       |                203 |             100      |
+| 18 | B      | Second  |       0 |   0       |                203 |             100      |
+| 19 | A      | Third   |       0 |   0       |                203 |             100      |
+| 20 | A      | Second  |       0 |   0       |                203 |             100      |
 
 In many cases this might be too much data, but sometimes the fact that a combination is 
 missing could be insightful.
