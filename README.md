@@ -588,29 +588,29 @@ fitting that criteria, use `clip_0=False`
 ```python
 df.stb.freq(['deck', 'class'], clip_0=False)
 ```
-|    | deck   | class   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | deck   | class   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:-------|:--------|--------:|----------:|-------------------:|---------------------:|
-|  0 | C      | First   |      59 | 0.29064   |                 59 |             0.29064  |
-|  1 | B      | First   |      47 | 0.231527  |                106 |             0.522167 |
-|  2 | D      | First   |      29 | 0.142857  |                135 |             0.665025 |
-|  3 | E      | First   |      25 | 0.123153  |                160 |             0.788177 |
-|  4 | A      | First   |      15 | 0.0738916 |                175 |             0.862069 |
-|  5 | F      | Second  |       8 | 0.0394089 |                183 |             0.901478 |
-|  6 | F      | Third   |       5 | 0.0246305 |                188 |             0.926108 |
-|  7 | G      | Third   |       4 | 0.0197044 |                192 |             0.945813 |
-|  8 | E      | Second  |       4 | 0.0197044 |                196 |             0.965517 |
-|  9 | D      | Second  |       4 | 0.0197044 |                200 |             0.985222 |
-| 10 | E      | Third   |       3 | 0.0147783 |                203 |             1        |
-| 11 | G      | Second  |       0 | 0         |                203 |             1        |
-| 12 | G      | First   |       0 | 0         |                203 |             1        |
-| 13 | F      | First   |       0 | 0         |                203 |             1        |
-| 14 | D      | Third   |       0 | 0         |                203 |             1        |
-| 15 | C      | Third   |       0 | 0         |                203 |             1        |
-| 16 | C      | Second  |       0 | 0         |                203 |             1        |
-| 17 | B      | Third   |       0 | 0         |                203 |             1        |
-| 18 | B      | Second  |       0 | 0         |                203 |             1        |
-| 19 | A      | Third   |       0 | 0         |                203 |             1        |
-| 20 | A      | Second  |       0 | 0         |                203 |             1        |
+|  0 | C      | First   |      59 |  29.064   |                 59 |              29.064  |
+|  1 | B      | First   |      47 |  23.1527  |                106 |              52.2167 |
+|  2 | D      | First   |      29 |  14.2857  |                135 |              66.5025 |
+|  3 | E      | First   |      25 |  12.3153  |                160 |              78.8177 |
+|  4 | A      | First   |      15 |   7.38916 |                175 |              86.2069 |
+|  5 | F      | Second  |       8 |   3.94089 |                183 |              90.1478 |
+|  6 | F      | Third   |       5 |   2.46305 |                188 |              92.6108 |
+|  7 | G      | Third   |       4 |   1.97044 |                192 |              94.5813 |
+|  8 | E      | Second  |       4 |   1.97044 |                196 |              96.5517 |
+|  9 | D      | Second  |       4 |   1.97044 |                200 |              98.5222 |
+| 10 | E      | Third   |       3 |   1.47783 |                203 |             100      |
+| 11 | G      | Second  |       0 |   0       |                203 |             100      |
+| 12 | G      | First   |       0 |   0       |                203 |             100      |
+| 13 | F      | First   |       0 |   0       |                203 |             100      |
+| 14 | D      | Third   |       0 |   0       |                203 |             100      |
+| 15 | C      | Third   |       0 |   0       |                203 |             100      |
+| 16 | C      | Second  |       0 |   0       |                203 |             100      |
+| 17 | B      | Third   |       0 |   0       |                203 |             100      |
+| 18 | B      | Second  |       0 |   0       |                203 |             100      |
+| 19 | A      | Third   |       0 |   0       |                203 |             100      |
+| 20 | A      | Second  |       0 |   0       |                203 |             100      |
 
 In many cases this might be too much data, but sometimes the fact that a combination is 
 missing could be insightful.
