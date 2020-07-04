@@ -113,3 +113,8 @@ Make sure all your changes are committed (including an entry in HISTORY.md).
 python setup.py sdist bdist_wheel
 twine upload dist/* --verbose
 ```
+
+### Updating conda-forge
+Process [here](https://conda-forge.org/docs/maintainer/updating_pkgs.html)
+
+Feedstock [here](https://github.com/conda-forge/sidetable-feedstock)

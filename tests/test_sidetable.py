@@ -22,7 +22,7 @@ def test_single_group(titanic):
     """
     table = titanic.stb.freq(['sex'])
     assert table.shape == (2, 5)
-    assert table['Count'].sum() == 891
+    assert table['count'].sum() == 891
 
 
 def test_double_group(titanic):
@@ -30,7 +30,7 @@ def test_double_group(titanic):
     """
     table = titanic.stb.freq(['sex', 'class'])
     assert table.shape == (6, 6)
-    assert table['Count'].sum() == 891
+    assert table['count'].sum() == 891
 
 
 def test_values(titanic):
@@ -69,7 +69,7 @@ def test_cutoff(titanic):
     table = titanic.stb.freq(['class', 'deck'], value='fare')
     assert table.shape == (11, 6)
 
-    table = titanic.stb.freq(['class', 'deck'], value='fare', thresh=.94)
+    table = titanic.stb.freq(['class', 'deck'], value='fare', thresh=94)
     assert table.shape == (5, 6)
 
 
@@ -85,7 +85,7 @@ def test_grand_total(titanic):
     """
     table = titanic.stb.subtotal()
     assert table.shape == (892, 15)
-    assert table.loc['Grand Total', 'fare'] == 28693.9493
+    assert table.loc['grand_total', 'fare'] == 28693.9493
 
 
 def test_grand_total_label(titanic):

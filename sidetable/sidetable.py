@@ -25,7 +25,7 @@ class SideTableAccessor:
 
     def freq(self,
              cols,
-             thresh=1,
+             thresh=100,
              other_label='Others',
              clip_0=True,
              value=None,
@@ -72,8 +72,8 @@ class SideTableAccessor:
         if value and not is_numeric_dtype(self._obj[value]):
             raise AttributeError(f'{value} must be a numeric column')
 
-        if thresh > 1:
-            raise AttributeError('Cutoff must be <= 1.0')
+        if thresh > 100:
+            raise AttributeError('Cutoff must be <= 100')
 
         # Determine aggregation (counts or summation) for each item in column
 
@@ -84,7 +84,7 @@ class SideTableAccessor:
             agg_func = {value: 'sum'}
             group_data = self._obj.groupby(cols).agg(agg_func).reset_index()
         else:
-            col_name = 'Count'
+            col_name = 'count'
             group_data = self._obj.groupby(cols).size().reset_index(
                 name=col_name)
 
@@ -103,47 +103,47 @@ class SideTableAccessor:
 
         # Include percents
         total = results[col_name].sum()
-        results['Percent'] = results[col_name] / total
+        results['percent'] = (results[col_name] / total) * 100
 
         # Keep track of cumulative counts or totals as well as their relative percent
-        results[f'Cumulative {col_name}'] = results[col_name].cumsum()
+        results[f'cumulative_{col_name}'] = results[col_name].cumsum()
         results[
-            'Cumulative Percent'] = results[f'Cumulative {col_name}'] / total
+            'cumulative_percent'] = (results[f'cumulative_{col_name}'] / total) * 100
 
         # cutoff is a percentage below which all values are grouped together in an
         # others category
-        if thresh < 1:
+        if thresh < 100:
             # Flag the All Other rows
-            results['Others'] = False
-            results.loc[results['Cumulative Percent'] > thresh,
-                        'Others'] = True
+            results['others'] = False
+            results.loc[results['cumulative_percent'] > thresh,
+                        'others'] = True
 
             # Calculate the total amount and percentage of the others
-            other_total = results.loc[results['Others'], col_name].sum()
-            other_pct = other_total / total
+            other_total = results.loc[results['others'], col_name].sum()
+            other_pct = (other_total / total) * 100
 
             # Create the footer row to append to the results
             all_others = pd.DataFrame({
                 col_name: [other_total],
-                'Percent': [other_pct],
-                f'Cumulative {col_name}': [total],
-                'Cumulative Percent': [1.0]
+                'percent': [other_pct],
+                f'cumulative_{col_name}': [total],
+                'cumulative_percent': [100.0]
             })
 
             # Add the footer row, remove the Others column and rename the placeholder
-            results = results[results['Others'] == False].append(
-                all_others, ignore_index=True).drop(columns=['Others']).fillna(
+            results = results[results['others'] == False].append(
+                all_others, ignore_index=True).drop(columns=['others']).fillna(
                     dict.fromkeys(cols, other_label))
         if not cum_cols:
             results = results.drop(
-                columns=['Cumulative Percent', f'Cumulative {col_name}'])
+                columns=['cumulative_percent', f'cumulative_{col_name}'])
         if style:
             format_dict = {
-                'Percent': '{:.2%}',
-                'Cumulative Percent': '{:.2%}',
-                'Count': '{0:,.0f}',
+                'percent': '{:.2f}%',
+                'cumulative_percent': '{:.2f}%',
+                'count': '{0:,.0f}',
                 f'{col_name}': '{0:,.0f}',
-                f'Cumulative {col_name}': '{0:,.0f}'
+                f'cumulative_{col_name}': '{0:,.0f}'
             }
             return results.style.format(format_dict)
         else:
@@ -160,20 +160,20 @@ class SideTableAccessor:
             and Total rows
         """
         missing = pd.concat([self._obj.isna().sum(),
-                             self._obj.isna().mean()],
+                             self._obj.isna().mean().mul(100)],
                             axis='columns').rename(columns={
-                                0: 'Missing',
-                                1: 'Percent'
+                                0: 'missing',
+                                1: 'percent'
                             })
-        missing['Total'] = len(self._obj)
+        missing['total'] = len(self._obj)
         if clip_0:
-            missing = missing[missing['Missing'] > 0]
+            missing = missing[missing['missing'] > 0]
 
-        results = missing[['Missing', 'Total',
-                           'Percent']].sort_values(by=['Missing'],
+        results = missing[['missing', 'total',
+                           'percent']].sort_values(by=['missing'],
                                                    ascending=False)
         if style:
-            format_dict = {'Percent': '{:.2%}', 'Total': '{0:,.0f}'}
+            format_dict = {'percent': '{:.2f}%', 'total': '{0:,.0f}'}
             return results.style.format(format_dict)
         else:
             return results
@@ -217,7 +217,7 @@ class SideTableAccessor:
 
     def subtotal(self,
                  sub_level=None,
-                 grand_label='Grand Total',
+                 grand_label='grand_total',
                  sub_label='subtotal',
                  show_sep=True,
                  sep=' | '):
