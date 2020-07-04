@@ -1,5 +1,7 @@
 # History
 
+# 0.7.0 (dev)
+
 # 0.6.0 (2020-7-4)
 - Frequency results were not proper percentages. Updated so percentages used correctly.
   This is a backwards-incompatible change
