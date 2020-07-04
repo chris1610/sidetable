@@ -525,13 +525,12 @@ One alternative could be:
 df['fare_bin'] = pd.qcut(df['fare'], q=4, labels=['low', 'medium', 'high', 'x-high'])
 df.stb.freq(['fare_bin'])
 ```
-|    | fare_bin   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | fare_bin   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:-----------|--------:|----------:|-------------------:|---------------------:|
-|  0 | medium     |     224 |  0.251403 |                224 |             0.251403 |
-|  1 | low        |     223 |  0.250281 |                447 |             0.501684 |
-|  2 | x-high     |     222 |  0.249158 |                669 |             0.750842 |
-|  3 | high       |     222 |  0.249158 |                891 |             1        |
-
+|  0 | medium     |     224 |   25.1403 |                224 |              25.1403 |
+|  1 | low        |     223 |   25.0281 |                447 |              50.1684 |
+|  2 | x-high     |     222 |   24.9158 |                669 |              75.0842 |
+|  3 | high       |     222 |   24.9158 |                891 |             100      |
 
 The other caveat is that null or missing values can cause data to drop out while aggregating.
 For instance, if we look at the `deck` variable, there are a lot of missing values.
@@ -539,15 +538,15 @@ For instance, if we look at the `deck` variable, there are a lot of missing valu
 ```python
 df.stb.freq(['deck'])
 ```
-|    | deck   |   Count |   Percent |   Cumulative Count |   Cumulative Percent |
+|    | deck   |   count |   percent |   cumulative_count |   cumulative_percent |
 |---:|:-------|--------:|----------:|-------------------:|---------------------:|
-|  0 | C      |      59 | 0.29064   |                 59 |             0.29064  |
-|  1 | B      |      47 | 0.231527  |                106 |             0.522167 |
-|  2 | D      |      33 | 0.162562  |                139 |             0.684729 |
-|  3 | E      |      32 | 0.157635  |                171 |             0.842365 |
-|  4 | A      |      15 | 0.0738916 |                186 |             0.916256 |
-|  5 | F      |      13 | 0.0640394 |                199 |             0.980296 |
-|  6 | G      |       4 | 0.0197044 |                203 |             1        |
+|  0 | C      |      59 |  29.064   |                 59 |              29.064  |
+|  1 | B      |      47 |  23.1527  |                106 |              52.2167 |
+|  2 | D      |      33 |  16.2562  |                139 |              68.4729 |
+|  3 | E      |      32 |  15.7635  |                171 |              84.2365 |
+|  4 | A      |      15 |   7.38916 |                186 |              91.6256 |
+|  5 | F      |      13 |   6.40394 |                199 |              98.0296 |
+|  6 | G      |       4 |   1.97044 |                203 |             100      |
 
 
 The total cumulative count only goes up to 203 not the 891 we have seen in other examples.
