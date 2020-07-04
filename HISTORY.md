@@ -4,6 +4,7 @@
 - Frequency results were not proper percentages. Updated so percentages used correctly.
   This is a backwards-incompatible change
 - Also changed the column labels to be lower_case
+- Changed Grand Total to be grand_total
 
 # 0.5.0 (2020-06-22)
 - Subtotal sorting was not working consistently. Fixed

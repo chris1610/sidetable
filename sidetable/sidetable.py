@@ -37,10 +37,10 @@ class SideTableAccessor:
         values which can be useful for identifying a cutoff.
 
         Example of Titanic df.stb.freq(['class']):
-                 class	  Count	    Percent	    Cumulative Count	Cumulative Percent
-                0	Third	491	    0.551066	491	                0.551066
-                1	First	216	    0.242424	707	                0.793490
-                2	Second	184	    0.206510	891	                1.000000
+                 class	  count	    percent	    cumulative_count	cumulative_percent
+                0	Third	491	    55.1066	    491	                55.1066
+                1	First	216	    24.2424	    707	                79.3490
+                2	Second	184	    20.6510	    891	                100.0
 
         Args:
             cols (list):       dataframe column names that will be grouped together
@@ -73,7 +73,7 @@ class SideTableAccessor:
             raise AttributeError(f'{value} must be a numeric column')
 
         if thresh > 100:
-            raise AttributeError('Cutoff must be <= 100')
+            raise AttributeError('Thresh must be <= 100')
 
         # Determine aggregation (counts or summation) for each item in column
 
