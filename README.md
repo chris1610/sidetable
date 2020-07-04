@@ -185,12 +185,18 @@ I very much appreciate the work that all three authors did to point me in this d
 
 ```batch
 
-$ python -m pip install sidetable
+$  python -m pip install -U sidetable
 ```
 
 This is the preferred method to install sidetable, as it will always
 install the most recent stable release. sidetable requires pandas 1.0 or higher and no
 additional dependencies. It should run anywhere that pandas runs.
+
+If you prefer to use conda, sidetable is available on conda-forge:
+
+```batch
+$ conda install -c conda-forge sidetable
+```
 
 ## Usage
 ```python
