@@ -552,18 +552,22 @@ df.stb.freq(['deck'])
 The total cumulative count only goes up to 203 not the 891 we have seen in other examples.
 Future versions of sidetable may handle this differently. For now, it is up to you to 
 decide how best to handle unknowns. For example, this version of the Titanic data set
-has a categorical value for `deck` so using `fillna` requires and extra step:
+has a categorical value for `deck` so using `fillna` requires an extra step:
 
 ```python
 df['deck_fillna'] = df['deck'].cat.add_categories('UNK').fillna('UNK')
 df.stb.freq(['deck_fillna'])
 ```
-|    | fare_bin   |   count |   percent |   cumulative_count |   cumulative_percent |
-|---:|:-----------|--------:|----------:|-------------------:|---------------------:|
-|  0 | medium     |     224 |   25.1403 |                224 |              25.1403 |
-|  1 | low        |     223 |   25.0281 |                447 |              50.1684 |
-|  2 | x-high     |     222 |   24.9158 |                669 |              75.0842 |
-|  3 | high       |     222 |   24.9158 |                891 |             100      |
+|    | deck_fillna   |   count |   percent |   cumulative_count |   cumulative_percent |
+|---:|:--------------|--------:|----------:|-------------------:|---------------------:|
+|  0 | UNK           |     688 | 77.2166   |                688 |              77.2166 |
+|  1 | C             |      59 |  6.62177  |                747 |              83.8384 |
+|  2 | B             |      47 |  5.27497  |                794 |              89.1134 |
+|  3 | D             |      33 |  3.7037   |                827 |              92.8171 |
+|  4 | E             |      32 |  3.59147  |                859 |              96.4085 |
+|  5 | A             |      15 |  1.6835   |                874 |              98.092  |
+|  6 | F             |      13 |  1.45903  |                887 |              99.5511 |
+|  7 | G             |       4 |  0.448934 |                891 |             100      |
 
 Another variant is that there might be certain groupings where there are no valid counts.
 
@@ -620,8 +624,8 @@ df.stb.freq(['deck', 'class'], clip_0=False)
 In many cases this might be too much data, but sometimes the fact that a combination is 
 missing could be insightful.
 
-With the subtotal function, sidetable convert a Categorical MultiIndex to a plain index
-in order to easily add the subtotal labels.
+The final caveat relates to `subtotal`. When working with the `subtotal` function, sidetable 
+convert a Categorical MultiIndex to a plain index in order to easily add the subtotal labels.
 
 ## TODO
 
