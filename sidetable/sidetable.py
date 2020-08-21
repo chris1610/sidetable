@@ -107,8 +107,8 @@ class SideTableAccessor:
 
         # Keep track of cumulative counts or totals as well as their relative percent
         results[f'cumulative_{col_name}'] = results[col_name].cumsum()
-        results[
-            'cumulative_percent'] = (results[f'cumulative_{col_name}'] / total) * 100
+        results['cumulative_percent'] = (results[f'cumulative_{col_name}'] /
+                                         total) * 100
 
         # cutoff is a percentage below which all values are grouped together in an
         # others category
@@ -132,7 +132,8 @@ class SideTableAccessor:
 
             # Add the footer row, remove the Others column and rename the placeholder
             results = results[results[other_label] == False].append(
-                all_others, ignore_index=True).drop(columns=[other_label]).fillna(
+                all_others,
+                ignore_index=True).drop(columns=[other_label]).fillna(
                     dict.fromkeys(cols, other_label))
         if not cum_cols:
             results = results.drop(
@@ -159,12 +160,13 @@ class SideTableAccessor:
             DataFrame with each Column including total Missing Values, Percent Missing
             and Total rows
         """
-        missing = pd.concat([self._obj.isna().sum(),
-                             self._obj.isna().mean().mul(100)],
-                            axis='columns').rename(columns={
-                                0: 'missing',
-                                1: 'percent'
-                            })
+        missing = pd.concat(
+            [self._obj.isna().sum(),
+             self._obj.isna().mean().mul(100)],
+            axis='columns').rename(columns={
+                0: 'missing',
+                1: 'percent'
+            })
         missing['total'] = len(self._obj)
         if clip_0:
             missing = missing[missing['missing'] > 0]
@@ -177,6 +179,91 @@ class SideTableAccessor:
             return results.style.format(format_dict)
         else:
             return results
+
+    def counts(self,
+               include=None,
+               exclude=None,
+               sort_ascending=True,
+               sort_col='unique'):
+        """ Build a table of total and unique values in a column.
+        Also include most and least frequent counts and items.
+
+        |             |   count |   unique | most_freq   |   most_freq_count | least_freq   |   least_freq_count |
+        |:------------|--------:|---------:|:------------|------------------:|:-------------|-------------------:|
+        | survived    |     891 |        2 | 0           |               549 | 1            |                342 |
+        | sex         |     891 |        2 | male        |               577 | female       |                314 |
+        | adult_male  |     891 |        2 | True        |               537 | False        |                354 |
+
+        Args:
+            include ([type], optional): List of types to include. Defaults to None.
+                                        number object, category, datetime are valid options
+                                        as well as valid options for select_dtypes
+            exclude ([type], optional): List of types to exclude. Defaults to None.
+                                        number, object, category, datetime are valid options
+                                        as well as valid options for select_dtypes
+            sort_ascending (bool, optional): Sort order. Defaults to True.
+            sort_col (str, optional): Column (or index) to use for sorting. Defaults to 'unique'.
+
+        Raises:
+            ValueError: If invalid sort_col requested
+            ValueError: If exclude options not correct
+
+        Returns:
+            DataFrame: Table with counts as well as unique values and most and least freq counts
+        """
+        # Descriptions for the resulting columns
+        col_labels = [
+            'count', 'unique', 'most_freq', 'most_freq_count', 'least_freq',
+            'least_freq_count'
+        ]
+
+        # Can only sort on columns that are numeric
+        valid_sort_cols = [
+            'index', 'count', 'unique', 'most_freq_count', 'least_freq_count'
+        ]
+
+        # By default we support sorting by column names but can handle an index sort
+        sort_by_col = True
+        if sort_col not in valid_sort_cols:
+            msg = f"sort_col must be one of {valid_sort_cols}"
+            raise ValueError(msg)
+        if sort_col == 'index':
+            sort_by_col = False
+
+        # if all is passed to include, make sure no exclusions made too
+        # then assign all columns
+        if include == 'all':
+            if exclude is not None:
+                msg = "exclude must be None when include is 'all'"
+                raise ValueError(msg)
+            cols_to_use = self._obj.columns
+
+        # Default is to include all columns
+        elif (include is None) and (exclude is None):
+            cols_to_use = self._obj.columns
+
+        # Pass the include and exclude values to select_dtypes
+        else:
+            cols_to_use = self._obj.select_dtypes(include=include,
+                                                  exclude=exclude).columns
+
+        # Calculate the results for all selected columns and build a DataFrame
+        results = [(self._obj[col].count(), self._obj[col].nunique(),
+                    self._obj[col].value_counts().idxmax(),
+                    self._obj[col].value_counts().max(),
+                    self._obj[col].value_counts().idxmin(),
+                    self._obj[col].value_counts().min())
+                   for col in cols_to_use]
+        result_df = pd.DataFrame.from_records(results,
+                                              index=cols_to_use,
+                                              columns=col_labels)
+
+        # Return the DataFrame sorted by a specific column or the index
+        if sort_by_col:
+            return result_df.sort_values(by=[sort_col],
+                                         ascending=sort_ascending)
+        else:
+            return result_df.sort_index(ascending=sort_ascending)
 
     def _get_group_levels(self, level=1):
         """Internal helper function to flatten out the group list from a multiindex
