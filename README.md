@@ -127,6 +127,9 @@ sidetable has several useful features:
 - [Rationale](#rationale)
 - [Installation](#installation)
 - [Usage](#usage)
+  - [freq](#freq)
+  - [missing](#missing)
+  - [subtotal](#subtotal)
 - [Caveats](#caveats)
 - [TODO](#todo)
 - [Contributing](#contributing)
@@ -212,6 +215,7 @@ to add a `.stb` accessor to all of your DataFrames. Once you `import sidetable` 
 go. In these examples, I will be using seaborn's Titanic dataset as an example but
 seaborn is not a direct dependency.
 
+### freq
 If you have used `value_counts()` before, you have probably wished it were easier to
 combine the values with percentage distribution.
 
@@ -326,7 +330,9 @@ df.stb.freq(['class', 'who'], value='fare', thresh=80, other_label='All others')
 |  3 | Second     | man        | 1886.36 |   6.57406 |          22845    |              79.6161 |
 |  4 | All others | All others | 5848.95 |  20.3839  |          28693.9  |             100      |
 
-Finally, sidetable includes a summary table that shows the missing values in
+### missin
+
+sidetable also includes a summary table that shows the missing values in
 your data by count and percentage of total missing values in a column.
 
 ```python
@@ -375,6 +381,7 @@ df.stb.missing(style=True)
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
 
+### subtotal
 Another useful function is the subtotal function. Trying to add a subtotal 
 to grouped pandas data is not easy. sidetable adds a `subtotal()` function that
 makes adds a subtotal at one or more levels of a DataFrame.
