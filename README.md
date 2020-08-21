@@ -330,8 +330,55 @@ df.stb.freq(['class', 'who'], value='fare', thresh=80, other_label='All others')
 |  3 | Second     | man        | 1886.36 |   6.57406 |          22845    |              79.6161 |
 |  4 | All others | All others | 5848.95 |  20.3839  |          28693.9  |             100      |
 
-### missing
+### counts
+The `counts()` function shows how many unique values are in each column as well as 
+the most and least frequent values & their total counts. This summary view can help you determine if you need
+to convert data to a categorical value. It can also help you understand the high 
+level structure of your data.
 
+```python
+df.stb.counts()
+```
+|             |   count |   unique | most_freq   |   most_freq_count | least_freq   |   least_freq_count |
+|:------------|--------:|---------:|:------------|------------------:|:-------------|-------------------:|
+| survived    |     891 |        2 | 0           |               549 | 1            |                342 |
+| sex         |     891 |        2 | male        |               577 | female       |                314 |
+| adult_male  |     891 |        2 | True        |               537 | False        |                354 |
+| alive       |     891 |        2 | no          |               549 | yes          |                342 |
+| alone       |     891 |        2 | True        |               537 | False        |                354 |
+| pclass      |     891 |        3 | 3           |               491 | 2            |                184 |
+| embarked    |     889 |        3 | S           |               644 | Q            |                 77 |
+| class       |     891 |        3 | Third       |               491 | Second       |                184 |
+| who         |     891 |        3 | man         |               537 | child        |                 83 |
+| embark_town |     889 |        3 | Southampton |               644 | Queenstown   |                 77 |
+| sibsp       |     891 |        7 | 0           |               608 | 5            |                  5 |
+| parch       |     891 |        7 | 0           |               678 | 6            |                  1 |
+| deck        |     203 |        7 | C           |                59 | G            |                  4 |
+| age         |     714 |       88 | 24.0        |                30 | 20.5         |                  1 |
+| fare        |     891 |      248 | 8.05        |                43 | 63.3583      |                  1 |
+
+By default, all data types are included but you may use the `exclude` and `include` parameters
+to select specific types of columns. The syntax is the same as pandas 
+[select_dtypes](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.select_dtypes.html)
+
+For example,
+```python
+df.stb.counts(exclude='number')
+```
+
+|             |   count |   unique | most_freq   |   most_freq_count | least_freq   |   least_freq_count |
+|:------------|--------:|---------:|:------------|------------------:|:-------------|-------------------:|
+| sex         |     891 |        2 | male        |               577 | female       |                314 |
+| adult_male  |     891 |        2 | True        |               537 | False        |                354 |
+| alive       |     891 |        2 | no          |               549 | yes          |                342 |
+| alone       |     891 |        2 | True        |               537 | False        |                354 |
+| embarked    |     889 |        3 | S           |               644 | Q            |                 77 |
+| class       |     891 |        3 | Third       |               491 | Second       |                184 |
+| who         |     891 |        3 | man         |               537 | child        |                 83 |
+| embark_town |     889 |        3 | Southampton |               644 | Queenstown   |                 77 |
+| deck        |     203 |        7 | C           |                59 | G            |                  4 |
+
+### missing
 sidetable also includes a summary table that shows the missing values in
 your data by count and percentage of total missing values in a column.
 
@@ -365,7 +412,7 @@ df.stb.missing(style=True)
 
 |             |   missing |   total |    percent |
 |:------------|----------:|--------:|-----------:|
-| deck        |       688 |     891 | 77.25%     |
+| deck        |       688 |     891 | 77.22%     |
 | age         |       177 |     891 | 19.87%     |
 | embarked    |         2 |     891 | 0.22%      |
 | embark_town |         2 |     891 | 0.22%      |
