@@ -330,7 +330,7 @@ df.stb.freq(['class', 'who'], value='fare', thresh=80, other_label='All others')
 |  3 | Second     | man        | 1886.36 |   6.57406 |          22845    |              79.6161 |
 |  4 | All others | All others | 5848.95 |  20.3839  |          28693.9  |             100      |
 
-### missin
+### missing
 
 sidetable also includes a summary table that shows the missing values in
 your data by count and percentage of total missing values in a column.
@@ -380,6 +380,20 @@ df.stb.missing(style=True)
 | adult_male  |         0 |     891 | 0          |
 | alive       |         0 |     891 | 0          |
 | alone       |         0 |     891 | 0          |
+
+Finally, you can exclude the columns that have 0 missing values using
+the `clip_0=True` parameter:
+
+```python
+df.stb.missing(clip_0=True, style=True)
+```
+|             |   missing |   total |   percent |
+|:------------|----------:|--------:|----------:|
+| deck        |       688 |     891 | 77.22%    |
+| age         |       177 |     891 | 19.87%    |
+| embarked    |         2 |     891 |  0.22%    |
+| embark_town |         2 |     891 |  0.22%    |
+
 
 ### subtotal
 Another useful function is the subtotal function. Trying to add a subtotal 
