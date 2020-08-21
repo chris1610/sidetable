@@ -39,16 +39,23 @@ def test_values(titanic):
     table = titanic.stb.freq(['embark_town', 'class'], value='fare')
     assert table.count()['class'] == 9
 
+
 def test_sorting(titanic):
     """ Sum the values of the fares and sort based on columns
 
     """
-    table = titanic.stb.freq(['embark_town', 'class'], value='fare', sort_cols=True)
+    table = titanic.stb.freq(['embark_town', 'class'],
+                             value='fare',
+                             sort_cols=True)
     assert table.shape == (9, 6)
-    assert table.iloc[-1,0] == 'Southampton'
+    assert table.iloc[-1, 0] == 'Southampton'
 
-    table = titanic.stb.freq(['embark_town', 'class'], value='fare', cum_cols=False, sort_cols=True)
-    assert table.shape == (9,4)
+    table = titanic.stb.freq(['embark_town', 'class'],
+                             value='fare',
+                             cum_cols=False,
+                             sort_cols=True)
+    assert table.shape == (9, 4)
+
 
 def test_clipping(titanic):
     """Make sure we can show all the values
@@ -106,3 +113,20 @@ def test_subtotal(titanic):
                               sub_label='Group Total').shape == (57, 1)
     assert table.stb.subtotal(sub_level=2, show_sep=False).shape == (57, 1)
     assert table.stb.subtotal(sub_level=[1, 2]).shape == (59, 1)
+
+
+def test_counts(titanic):
+    """Test counts scenarios
+    """
+    assert titanic.stb.counts().shape == (15, 6)
+    assert titanic.stb.counts(include='number').shape == (6, 6)
+    assert titanic.stb.counts(exclude='number').shape == (9, 6)
+    answer = pd.Series([891, 248, 8.05, 43, 63.3581, 1],
+                       index=[
+                           'count', 'unique', 'most_freq', 'most_freq_count',
+                           'least_freq', 'least_freq_count'
+                       ],
+                       name='fare',
+                       dtype='object')
+    pd.testing.assert_series_equal(
+        titanic.stb.counts(sort_ascending=False).iloc[0], answer)
