@@ -119,6 +119,7 @@ sidetable has several useful features:
 * Provide a threshold point above which all data is grouped into a single bucket. This is useful for
   quickly identifying the areas to focus your analysis.
 * Get a count of the missing values in your data.
+* Count the number of unique values for each column.
 * Add grand totals on any DataFrame and subtotals to any grouped DataFrame
 
 ## Table of Contents:
@@ -128,6 +129,7 @@ sidetable has several useful features:
 - [Installation](#installation)
 - [Usage](#usage)
   - [freq](#freq)
+  - [counts](#counts)
   - [missing](#missing)
   - [subtotal](#subtotal)
 - [Caveats](#caveats)
