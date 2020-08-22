@@ -1,5 +1,7 @@
 # History
 
+# 0.8.0 (dev)
+
 # 0.7.0 (2020-8-21)
 - Add counts function to show the number of total and unique values in a column
 - Some doc cleanups and clarifications
