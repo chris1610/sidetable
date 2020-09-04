@@ -175,7 +175,11 @@ class SideTableAccessor:
                            'percent']].sort_values(by=['missing'],
                                                    ascending=False)
         if style:
-            format_dict = {'percent': '{:.2f}%', 'total': '{0:,.0f}'}
+            format_dict = {
+                'percent': '{:.2f}%',
+                'total': '{0:,.0f}',
+                'missing': '{0:,.0f}'
+            }
             return results.style.format(format_dict)
         else:
             return results
@@ -236,11 +240,13 @@ class SideTableAccessor:
             if exclude is not None:
                 msg = "exclude must be None when include is 'all'"
                 raise ValueError(msg)
-            cols_to_use = self._obj.columns
+            # Filter out columns that are completely null
+            cols_to_use = self._obj.columns[~self._obj.isna().all()]
 
         # Default is to include all columns
         elif (include is None) and (exclude is None):
-            cols_to_use = self._obj.columns
+            # Filter out completely null columns
+            cols_to_use = self._obj.columns[~self._obj.isna().all()]
 
         # Pass the include and exclude values to select_dtypes
         else:
