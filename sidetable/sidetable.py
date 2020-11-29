@@ -3,6 +3,7 @@
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 from functools import reduce
+import warnings
 
 
 @pd.api.extensions.register_dataframe_accessor("stb")
@@ -74,6 +75,9 @@ class SideTableAccessor:
 
         if thresh > 100:
             raise AttributeError('Thresh must be <= 100')
+
+        if thresh <= 1:
+            warnings.warn(f'thresh should be expressed as a percentage. Did you mean {int(thresh*100)}?')
 
         # Determine aggregation (counts or summation) for each item in column
 

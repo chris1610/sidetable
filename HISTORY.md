@@ -1,8 +1,10 @@
 # History
 
-# 0.8.0 (dev)
+# 0.8.0 (2020-11-29)
 - Fix styling for missing
 - Counts would break on completely null columns. Filter those out.
+- Add a warning if thresh is < 1
+
 # 0.7.0 (2020-8-21)
 - Add counts function to show the number of total and unique values in a column
 - Some doc cleanups and clarifications

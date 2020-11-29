@@ -4,6 +4,7 @@
 import pytest
 from sidetable import sidetable
 import pandas as pd
+import warnings
 
 
 @pytest.fixture
@@ -78,6 +79,13 @@ def test_cutoff(titanic):
 
     table = titanic.stb.freq(['class', 'deck'], value='fare', thresh=94)
     assert table.shape == (5, 6)
+
+
+def test_thresh_warning(titanic):
+    """ Validate user warning runs if threshold < 1
+    """
+    with pytest.warns(UserWarning):
+        table = titanic.stb.freq(['class', 'deck'], value='fare', thresh=.94)
 
 
 def test_missing(titanic):
