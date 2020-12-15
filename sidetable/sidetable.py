@@ -4,6 +4,7 @@ import pandas as pd
 from pandas.api.types import is_numeric_dtype
 from functools import reduce
 import warnings
+import weakref
 
 
 @pd.api.extensions.register_dataframe_accessor("stb")
@@ -15,8 +16,15 @@ class SideTableAccessor:
     SORT_FLAG = '~~~~zz'
 
     def __init__(self, pandas_obj):
+        self._finalizer = weakref.finalize(self, self._cleanup)
         self._validate(pandas_obj)
         self._obj = pandas_obj
+
+    def _cleanup(self):
+        del self._obj
+
+    def remove(self):
+        self._finalizer()
 
     @staticmethod
     def _validate(obj):
