@@ -117,4 +117,12 @@ twine upload dist/* --verbose
 ### Updating conda-forge
 Process [here](https://conda-forge.org/docs/maintainer/updating_pkgs.html)
 
-Feedstock [here](https://github.com/conda-forge/sidetable-feedstock)
+Go to feedstock [here](https://github.com/conda-forge/sidetable-feedstock)
+- Update /recipe/meta.yaml
+- Raw edit the file and save as a new branch
+    - latest version
+    - sha256: `sha256sum sidetable-VER-.tar.gz`
+- Background process will run to validate the pull request
+- Once all complete merge the request
+
+
