@@ -5,6 +5,7 @@ from pandas.api.types import is_numeric_dtype
 from functools import reduce
 import warnings
 import weakref
+from operator import itemgetter
 
 
 @pd.api.extensions.register_dataframe_accessor("stb")
@@ -85,7 +86,9 @@ class SideTableAccessor:
             raise AttributeError('Thresh must be <= 100')
 
         if thresh <= 1:
-            warnings.warn(f'thresh should be expressed as a percentage. Did you mean {int(thresh*100)}?')
+            warnings.warn(
+                f'thresh should be expressed as a percentage. Did you mean {int(thresh*100)}?'
+            )
 
         # Determine aggregation (counts or summation) for each item in column
 
@@ -438,5 +441,53 @@ class SideTableAccessor:
             subtotal = section.sum(numeric_only=True).rename(
                 tuple(sub_total_label))
             output.append(section.append(subtotal))
-
         return pd.concat(output)
+
+    def flatten(self, reset=True, levels=None, sep='_'):
+        """ Flatten multi-index column names into a single level of columns on a DataFrame
+
+            reset (bool):       Should reset_index() be used before returning results
+            levels (int, list): Indicate how many levels should be included in the column names
+                                Can also pass a list of column levels (0-indexed) [0,1,2]
+            sep (str):          Seperator for levels, defaults to _
+
+            Returns:
+                DataFrame with flattened column levels
+        """
+        tmp = self._obj.copy()
+        valid_nlevels = tmp.columns.nlevels
+        if valid_nlevels == 0:
+            # Do nothing since there is no multiindex
+            return tmp
+        if levels is None:
+            # Default to the max depth
+            levels = valid_nlevels
+        # Process when an integer is passed
+        if type(levels) in [int]:
+            if levels not in range(1, valid_nlevels + 1):
+                raise AttributeError(
+                    f"Levels must be between 1 and {valid_nlevels}")
+            else:
+                index = valid_nlevels - levels
+                col_vals = [col[index:valid_nlevels] for col in tmp.columns.values]
+        # Process a list or tuple of values
+        if type(levels) in [list, tuple]:
+            val_check = all([val in range(0, valid_nlevels) for val in levels])
+            if not val_check:
+                raise AttributeError(f"Value out of {range(0, valid_nlevels-1)}")
+            else:
+                if len(levels) > 1:
+                    col_vals = [itemgetter(*levels)(col) for col in tmp.columns.values]
+                else:
+                    # Only one value so get a single level only
+                    # Format this as a tuple so that the join doesn't break up the string
+                    col_vals = [(col[levels[0]],) for col in tmp.columns.values]
+        # Generate the column names and assign to the df
+        columns = [
+            sep.join(tuple(map(str, col))).rstrip(sep) for col in col_vals
+        ]
+        tmp.columns = columns
+        if reset:
+            return tmp.reset_index()
+        else:
+            return tmp
