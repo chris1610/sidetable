@@ -2,6 +2,7 @@
 
 # 0.9.0 (Dev)
 - Fix issue #19 so that users can release memory for big dataframes. Thanks Laurent Esingle.
+- Add new flatten() function to clean up multiindex column names
 
 # 0.8.0 (2020-11-29)
 - Fix styling for missing

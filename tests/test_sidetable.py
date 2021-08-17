@@ -129,7 +129,7 @@ def test_counts(titanic):
     assert titanic.stb.counts().shape == (15, 6)
     assert titanic.stb.counts(include='number').shape == (6, 6)
     assert titanic.stb.counts(exclude='number').shape == (9, 6)
-    answer = pd.Series([891, 248, 8.05, 43, 63.3581, 1],
+    answer = pd.Series([891, 248, 8.05, 43, 5.0, 1],
                        index=[
                            'count', 'unique', 'most_freq', 'most_freq_count',
                            'least_freq', 'least_freq_count'
@@ -138,3 +138,32 @@ def test_counts(titanic):
                        dtype='object')
     pd.testing.assert_series_equal(
         titanic.stb.counts(sort_ascending=False).iloc[0], answer)
+
+
+def test_flatten(titanic):
+    """Test the flatten function
+    """
+    fares = titanic.groupby(['embark_town', 'class', 'sex']).agg({
+        'fare': ['sum', 'mean']
+    }).unstack()
+    assert fares.shape == (9, 4)
+    assert fares.stb.flatten().shape == (9, 6)
+    assert fares.stb.flatten(reset=False).index.names == [
+        'embark_town', 'class'
+    ]
+    assert list(fares.stb.flatten(sep='|').columns) == [
+        'embark_town', 'class', 'fare|sum|female', 'fare|sum|male',
+        'fare|mean|female', 'fare|mean|male'
+    ]
+    assert list(fares.stb.flatten(levels=2).columns) == [
+        'embark_town', 'class', 'sum_female', 'sum_male', 'mean_female',
+        'mean_male'
+    ]
+    assert list(fares.stb.flatten(levels=[2, 1]).columns) == [
+        'embark_town', 'class', 'female_sum', 'male_sum', 'female_mean',
+        'male_mean'
+    ]
+    assert list(fares.stb.flatten().columns) == [
+        'embark_town', 'class', 'fare_sum_female', 'fare_sum_male',
+        'fare_mean_female', 'fare_mean_male'
+    ]
