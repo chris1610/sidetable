@@ -144,7 +144,9 @@ class SideTableAccessor:
                 f'cumulative_{col_name}': [total],
                 'cumulative_percent': [100.0]
             })
-
+            # Categorical columns can break the merge. Convert to strings
+            cat_cols = results.select_dtypes(['category']).columns
+            results[cat_cols] = results[cat_cols].apply(lambda x: x.astype(str))
             # Add the footer row, remove the Others column and rename the placeholder
             results = results[results[other_label] == False].append(
                 all_others,
