@@ -4,9 +4,10 @@
 [![Pypi link](https://img.shields.io/pypi/v/sidetable.svg)](https://pypi.python.org/pypi/sidetable)
 ![PyPI - Downloads](https://img.shields.io/pypi/dw/sidetable)
 
-sidetable is a supercharged combination of pandas `value_counts` plus `crosstab` 
-that builds simple but useful summary tables of your pandas DataFrame. sidetable can also
-add subtotals to your DataFrame.
+sidetable started as a supercharged combination of pandas `value_counts` plus `crosstab` 
+that builds simple but useful summary tables of your pandas DataFrame. It has since expanded 
+to provide support for common and useful pandas tasks such as adding subtotals to your 
+DataFrame or flattening hierarchical columns.
 
 
 Usage is straightforward. Install and `import sidetable`. Then access it through the 
@@ -107,6 +108,24 @@ df.groupby(['sex', 'class']).agg({'fare': ['sum']}).stb.subtotal()
   </tbody>
 </table>
 
+You can also turn a hierarchical column structure into this:
+
+```python
+titanic.groupby(['embark_town', 'class', 'sex']).agg({'fare': ['sum'], 'age': ['mean']}).unstack().stb.flatten()
+```
+
+|    | embark_town   | class   |   fare_sum_female |   fare_sum_male |   age_mean_female |   age_mean_male |
+|---:|:--------------|:--------|------------------:|----------------:|------------------:|----------------:|
+|  0 | Cherbourg     | First   |          4972.53  |        3928.54  |           36.0526 |         40.1111 |
+|  1 | Cherbourg     | Second  |           176.879 |         254.212 |           19.1429 |         25.9375 |
+|  2 | Cherbourg     | Third   |           337.983 |         402.146 |           14.0625 |         25.0168 |
+|  3 | Queenstown    | First   |            90     |          90     |           33      |         44      |
+|  4 | Queenstown    | Second  |            24.7   |          12.35  |           30      |         57      |
+|  5 | Queenstown    | Third   |           340.159 |         465.046 |           22.85   |         28.1429 |
+|  6 | Southampton   | First   |          4753.29  |        4183.05  |           32.7045 |         41.8972 |
+|  7 | Southampton   | Second  |          1468.15  |        1865.55  |           29.7197 |         30.8759 |
+|  8 | Southampton   | Third   |          1642.97  |        3526.39  |           23.2237 |         26.5748 |
+
 
 sidetable has several useful features:
 
@@ -120,7 +139,7 @@ sidetable has several useful features:
   quickly identifying the areas to focus your analysis.
 * Get a count of the missing values in your data.
 * Count the number of unique values for each column.
-* Add grand totals on any DataFrame and subtotals to any grouped DataFrame
+* Add grand totals on any DataFrame and subtotals to any grouped DataFrame.
 
 ## Table of Contents:
 
@@ -132,6 +151,7 @@ sidetable has several useful features:
   - [counts](#counts)
   - [missing](#missing)
   - [subtotal](#subtotal)
+  - [flatten](#flatten)
 - [Caveats](#caveats)
 - [TODO](#todo)
 - [Contributing](#contributing)
@@ -577,6 +597,259 @@ summary_table.stb.subtotal(sub_level=[1, 2])
 The `subtotal` function also allows the user to configure the labels and separators used in 
 the subtotal and Grand Total by using the `grand_label`, `sub_label`, `show_sep` and `sep`
 arguments. 
+
+### flatten
+When grouping and pivoting data, you can end up with a DataFrame that has a multiindex.
+Often times, you want a simple flat representation of the data.
+
+For example, we can build a table using a `groupby()` plus `unstack()` that looks like this:
+
+```python
+df.groupby(['embark_town', 'class', 'sex']).agg({'fare': ['sum'], 'age': ['mean']}).unstack()
+```
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th colspan="2" halign="left">fare</th>
+      <th colspan="2" halign="left">age</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th></th>
+      <th colspan="2" halign="left">sum</th>
+      <th colspan="2" halign="left">mean</th>
+    </tr>
+    <tr>
+      <th></th>
+      <th>sex</th>
+      <th>female</th>
+      <th>male</th>
+      <th>female</th>
+      <th>male</th>
+    </tr>
+    <tr>
+      <th>embark_town</th>
+      <th>class</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="3" valign="top">Cherbourg</th>
+      <th>First</th>
+      <td>4972.5333</td>
+      <td>3928.5417</td>
+      <td>36.052632</td>
+      <td>40.111111</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>176.8792</td>
+      <td>254.2125</td>
+      <td>19.142857</td>
+      <td>25.937500</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>337.9833</td>
+      <td>402.1462</td>
+      <td>14.062500</td>
+      <td>25.016800</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">Queenstown</th>
+      <th>First</th>
+      <td>90.0000</td>
+      <td>90.0000</td>
+      <td>33.000000</td>
+      <td>44.000000</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>24.7000</td>
+      <td>12.3500</td>
+      <td>30.000000</td>
+      <td>57.000000</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>340.1585</td>
+      <td>465.0458</td>
+      <td>22.850000</td>
+      <td>28.142857</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">Southampton</th>
+      <th>First</th>
+      <td>4753.2917</td>
+      <td>4183.0458</td>
+      <td>32.704545</td>
+      <td>41.897188</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>1468.1500</td>
+      <td>1865.5500</td>
+      <td>29.719697</td>
+      <td>30.875889</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>1642.9668</td>
+      <td>3526.3945</td>
+      <td>23.223684</td>
+      <td>26.574766</td>
+    </tr>
+  </tbody>
+</table>
+
+If you wish to flatten it, use `stb.flatten()`:
+
+```python
+df.groupby(['embark_town', 'class', 'sex']).agg({'fare': ['sum'], 'age': ['mean']}).unstack().stb.flatten()
+```
+
+|    | embark_town   | class   |   fare_sum_female |   fare_sum_male |   age_mean_female |   age_mean_male |
+|---:|:--------------|:--------|------------------:|----------------:|------------------:|----------------:|
+|  0 | Cherbourg     | First   |          4972.53  |        3928.54  |           36.0526 |         40.1111 |
+|  1 | Cherbourg     | Second  |           176.879 |         254.212 |           19.1429 |         25.9375 |
+|  2 | Cherbourg     | Third   |           337.983 |         402.146 |           14.0625 |         25.0168 |
+|  3 | Queenstown    | First   |            90     |          90     |           33      |         44      |
+|  4 | Queenstown    | Second  |            24.7   |          12.35  |           30      |         57      |
+|  5 | Queenstown    | Third   |           340.159 |         465.046 |           22.85   |         28.1429 |
+|  6 | Southampton   | First   |          4753.29  |        4183.05  |           32.7045 |         41.8972 |
+|  7 | Southampton   | Second  |          1468.15  |        1865.55  |           29.7197 |         30.8759 |
+|  8 | Southampton   | Third   |          1642.97  |        3526.39  |           23.2237 |         26.5748 |
+
+flatten will also take additional arguments:
+* Add a custom separator using the `sep` argument - `stb.flatten(sep='|')`
+* Control whether or not to reset the index using `reset` argument - `stb.flatten(reset=False)`
+* Reorganize the output levels using `levels` argument `levels=2`
+  * `levels` can also take a list of valid levels if you want to reorganize the display
+     `levels=[0,2]`
+
+```python
+fares = df.groupby(['embark_town', 'class', 'sex']).agg({'fare': ['sum'], 'age': ['mean']}).unstack()
+fares.stb.flatten(sep='|', reset=False, levels=[0,2])
+```
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>fare|female</th>
+      <th>fare|male</th>
+      <th>fare|female</th>
+      <th>fare|male</th>
+      <th>age|female</th>
+      <th>age|male</th>
+    </tr>
+    <tr>
+      <th>embark_town</th>
+      <th>class</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="3" valign="top">Cherbourg</th>
+      <th>First</th>
+      <td>4972.5333</td>
+      <td>3928.5417</td>
+      <td>115.640309</td>
+      <td>93.536707</td>
+      <td>36.052632</td>
+      <td>40.111111</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>176.8792</td>
+      <td>254.2125</td>
+      <td>25.268457</td>
+      <td>25.421250</td>
+      <td>19.142857</td>
+      <td>25.937500</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>337.9833</td>
+      <td>402.1462</td>
+      <td>14.694926</td>
+      <td>9.352237</td>
+      <td>14.062500</td>
+      <td>25.016800</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">Queenstown</th>
+      <th>First</th>
+      <td>90.0000</td>
+      <td>90.0000</td>
+      <td>90.000000</td>
+      <td>90.000000</td>
+      <td>33.000000</td>
+      <td>44.000000</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>24.7000</td>
+      <td>12.3500</td>
+      <td>12.350000</td>
+      <td>12.350000</td>
+      <td>30.000000</td>
+      <td>57.000000</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>340.1585</td>
+      <td>465.0458</td>
+      <td>10.307833</td>
+      <td>11.924251</td>
+      <td>22.850000</td>
+      <td>28.142857</td>
+    </tr>
+    <tr>
+      <th rowspan="3" valign="top">Southampton</th>
+      <th>First</th>
+      <td>4753.2917</td>
+      <td>4183.0458</td>
+      <td>99.026910</td>
+      <td>52.949947</td>
+      <td>32.704545</td>
+      <td>41.897188</td>
+    </tr>
+    <tr>
+      <th>Second</th>
+      <td>1468.1500</td>
+      <td>1865.5500</td>
+      <td>21.912687</td>
+      <td>19.232474</td>
+      <td>29.719697</td>
+      <td>30.875889</td>
+    </tr>
+    <tr>
+      <th>Third</th>
+      <td>1642.9668</td>
+      <td>3526.3945</td>
+      <td>18.670077</td>
+      <td>13.307149</td>
+      <td>23.223684</td>
+      <td>26.574766</td>
+    </tr>
+  </tbody>
+</table>
+
 
 ## Caveats
 sidetable supports grouping on any data type in a pandas DataFrame. This means that
