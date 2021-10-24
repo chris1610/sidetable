@@ -163,6 +163,10 @@ def test_flatten(titanic):
         'embark_town', 'class', 'female_sum', 'male_sum', 'female_mean',
         'male_mean'
     ]
+    assert list(fares.stb.flatten(levels=(2, 1)).columns) == [
+        'embark_town', 'class', 'female_sum', 'male_sum', 'female_mean',
+        'male_mean'
+    ]
     assert list(fares.stb.flatten().columns) == [
         'embark_town', 'class', 'fare_sum_female', 'fare_sum_male',
         'fare_mean_female', 'fare_mean_male'

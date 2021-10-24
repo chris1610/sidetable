@@ -354,9 +354,9 @@ class SideTableAccessor:
         # No value is specified, use the maximum
         if sub_level is None:
             sub_calc_list = list(range(1, all_levels))
-        # Sort the list
-        elif isinstance(sub_level, list):
-            sub_calc_list = sub_level
+        # Sort the list or tuple
+        elif isinstance(sub_level, (list, tuple)):
+            sub_calc_list = list(sub_level)
             sub_calc_list.sort()
         # Convert an integer to a list
         elif isinstance(sub_level, int):
@@ -379,8 +379,11 @@ class SideTableAccessor:
 
         # Check that list is in the appropriate range
         if sub_calc_list[0] <= 0 or sub_calc_list[-1] > all_levels - 1:
-            raise AttributeError(
-                f'Subtotal level must be between 1 and {all_levels-1}')
+            if (all_levels-1) == 1:
+                error_msg = 'DataFrame only has 1 level. sub_level must be 1.'
+            else:
+                error_msg = f'sub_level must be between 1 and {all_levels-1}.'
+            raise AttributeError(error_msg)
 
         # Remove any categorical indices
         self._obj.index = pd.MultiIndex.from_tuples(

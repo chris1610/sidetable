@@ -3,7 +3,7 @@
 
 __author__ = """Chris Moffitt"""
 __email__ = 'chris@moffitts.net'
-__version__ = '0.9.0'
+__version__ = '0.9.1'
 
 from .sidetable import SideTableAccessor
 
