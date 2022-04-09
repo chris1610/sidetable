@@ -148,8 +148,8 @@ class SideTableAccessor:
             cat_cols = results.select_dtypes(['category']).columns
             results[cat_cols] = results[cat_cols].apply(lambda x: x.astype(str))
             # Add the footer row, remove the Others column and rename the placeholder
-            results = results[results[other_label] == False].append(
-                all_others,
+            results = pd.concat(
+                [results[results[other_label] == False], all_others],
                 ignore_index=True).drop(columns=[other_label]).fillna(
                     dict.fromkeys(cols, other_label))
         if not cum_cols:
@@ -372,10 +372,24 @@ class SideTableAccessor:
             # Getting into Categorical issues
             self._obj.index = self._obj.index.astype('object')
 
+            # Get list of all boolean columns
+            # Recent version of pandas have deprecated automatic boolean
+            # to numeric conversion. This preserves the previous behavior
+            # where boolean values are treated as integers
+            bool_col_convert = {
+                x: 'int64'
+                for x in self._obj.select_dtypes(include='bool').columns
+            }
+
             # If not multi-level, rename should not be a tuple
             # Add the Grand Total label at the end
-            return self._obj.append(
-                self._obj.sum(numeric_only=True).rename(grand_total_label[0]))
+
+            return pd.concat([
+                self._obj.astype(bool_col_convert),
+                self._obj.sum(numeric_only=True).rename(
+                    grand_total_label[0]).to_frame().T
+            ],
+                             axis='index')
 
         # Check that list is in the appropriate range
         if sub_calc_list[0] <= 0 or sub_calc_list[-1] > all_levels - 1:
@@ -406,8 +420,12 @@ class SideTableAccessor:
         # Remove the subtotal sorting values
         results.index = self._clean_labels(results.index)
         # Final step is to add Grand total
-        return results.append(
-            self._obj.sum(numeric_only=True).rename(grand_total_label))
+        return pd.concat([
+            results,
+            self._obj.sum(numeric_only=True).rename(
+                grand_total_label).to_frame().T
+        ],
+                         axis='index')
 
     def _calc_subtotal(self,
                        sub_level=None,
@@ -444,8 +462,8 @@ class SideTableAccessor:
             # Pull out the actual section and total it
             section = self._obj.xs(cross_section, drop_level=False)
             subtotal = section.sum(numeric_only=True).rename(
-                tuple(sub_total_label))
-            output.append(section.append(subtotal))
+                tuple(sub_total_label)).to_frame().T
+            output.append(pd.concat([section, subtotal]))
         return pd.concat(output)
 
     def flatten(self, reset=True, levels=None, sep='_'):
