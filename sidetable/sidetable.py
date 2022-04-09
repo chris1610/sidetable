@@ -5,6 +5,7 @@ from pandas.api.types import is_numeric_dtype
 from functools import reduce
 import warnings
 import weakref
+import math
 from operator import itemgetter
 
 
@@ -514,3 +515,68 @@ class SideTableAccessor:
             return tmp.reset_index()
         else:
             return tmp
+
+    def _pretty_col(self, col, precision, percent, pct_thresh):
+        # Code from https://github.com/azaitsev/millify
+        millnames = ['', 'k', 'M', 'B', 'T', 'P', 'E', 'Z', 'Y']
+        max_val = col.astype('float').max(axis=0)
+        magnitude = int(
+            math.floor(0 if max_val == 0 else math.log10(abs(max_val)) / 3))
+        millindex = max(0, min(len(millnames) - 1, magnitude))
+        values = col.div(10**(3 * millindex))
+        format_letter = millnames[millindex]
+        precision = f'.{precision}'
+        if percent and max_val <= pct_thresh:
+            format_string = "{:" + precision + "%}"
+        else:
+            format_string = '{:' + precision + 'f}' + f'{format_letter}'
+        return values, format_string
+
+    def pretty(self,
+               precision=2,
+               percent=True,
+               nan='--',
+               hide_index=False,
+               pct_thresh=1,
+               rows=10,
+               caption=None):
+        """ Pretty print a dataframe
+
+        precision (int):    How many digits to show
+        percent (bool):     Format numbers less than 1 as percentages
+        nan (string):       Display instead of NaN values
+        hide_index (bool):  Suppres the style of the index
+        pct_thresh (int):   Value below which will be show
+        rows(int):          Number of rows to display in the output
+        caption (str):      Caption to display at the top of the dataframe
+
+        Returns:
+        """
+        numeric_cols = self._obj.select_dtypes(include='number').columns
+        other_cols = self._obj.select_dtypes(exclude='number')
+        format_dict = {}
+        results = []
+        for col in numeric_cols:
+            new_col, format_data = self._pretty_col(self._obj[col], precision,
+                                                    percent, pct_thresh)
+            format_dict[col] = format_data
+            results.append(pd.Series(new_col, name=col))
+        formatted_df = pd.concat(results, axis=1)
+        full_df = pd.concat([other_cols, formatted_df], axis=1)
+        # Truncate the number of rows
+        # Max sure the column order is preserved
+        orig_col_order = self._obj.columns
+        if len(full_df.index) > rows:
+            short_table = pd.concat(
+                [full_df.head(int(rows / 2)),
+                 full_df.tail(int(rows / 2))])
+            return_data = short_table[orig_col_order].style.format(
+                format_dict, na_rep=nan)
+        else:
+            return_data = full_df[orig_col_order].style.format(format_dict,
+                                                                  na_rep=nan)
+        if hide_index:
+            return_data.hide(axis="index")
+        if caption:
+            return_data.set_caption(caption)
+        return return_data

@@ -2,6 +2,8 @@
 
 # 0.9.1 (Dev)
 - Fix issue #23 where tuple would cause an error. Also clarified error message.
+- Fix issue #25 where append is deprecated in pandas.
+- Adding stb.pretty() formatting
 
 # 0.9.0 (2021-8-18)
 - Fix issue #19 so that users can release memory for big dataframes. Thanks Laurent Esingle.
