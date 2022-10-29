@@ -1,6 +1,6 @@
 # History
 
-# 0.9.1 (Dev)
+# 0.9.1 (2022-10-29)
 - Fix issue #23 where tuple would cause an error. Also clarified error message.
 - Fix issue #25 where append is deprecated in pandas.
 - Adding stb.pretty() formatting

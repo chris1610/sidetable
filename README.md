@@ -140,6 +140,7 @@ sidetable has several useful features:
 * Get a count of the missing values in your data.
 * Count the number of unique values for each column.
 * Add grand totals on any DataFrame and subtotals to any grouped DataFrame.
+* Pretty print columns
 
 ## Table of Contents:
 
@@ -152,6 +153,7 @@ sidetable has several useful features:
   - [missing](#missing)
   - [subtotal](#subtotal)
   - [flatten](#flatten)
+  - [prettyprint](#prettyprint)
 - [Caveats](#caveats)
 - [TODO](#todo)
 - [Contributing](#contributing)
@@ -849,6 +851,168 @@ fares.stb.flatten(sep='|', reset=False, levels=[0,2])
     </tr>
   </tbody>
 </table>
+
+### prettyprint
+This function interprets the magnitude of your numeric results and returns a nicely
+formatted version of all the numbers. This can be used on a full DataFrame or during
+your analysis of aggregated data.
+
+For instance, if you are summarizing data, you may get something that looks like this:
+
+```python
+df.groupby(['pclass', 'sex']).agg({'fare': 'sum'})
+```
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>fare</th>
+    </tr>
+    <tr>
+      <th>pclass</th>
+      <th>sex</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">1</th>
+      <th>female</th>
+      <td>9975.8250</td>
+    </tr>
+    <tr>
+      <th>male</th>
+      <td>8201.5875</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">2</th>
+      <th>female</th>
+      <td>1669.7292</td>
+    </tr>
+    <tr>
+      <th>male</th>
+      <td>2132.1125</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">3</th>
+      <th>female</th>
+      <td>2321.1086</td>
+    </tr>
+    <tr>
+      <th>male</th>
+      <td>4393.5865</td>
+    </tr>
+  </tbody>
+</table>
+
+Use `stb.pretty()` to format it nicely so you can have the same order or magnitude for all numbers:
+
+```python
+df.groupby(['pclass', 'sex']).agg({'fare': 'sum'}).div(df['fare'].sum()).stb.pretty()
+```
+<style type="text/css">
+</style>
+<table id="T_1e94c">
+  <thead>
+    <tr>
+      <th class="blank" >&nbsp;</th>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_1e94c_level0_col0" class="col_heading level0 col0" >fare</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >pclass</th>
+      <th class="index_name level1" >sex</th>
+      <th class="blank col0" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_1e94c_level0_row0" class="row_heading level0 row0" rowspan="2">1</th>
+      <th id="T_1e94c_level1_row0" class="row_heading level1 row0" >female</th>
+      <td id="T_1e94c_row0_col0" class="data row0 col0" >9.98k</td>
+    </tr>
+    <tr>
+      <th id="T_1e94c_level1_row1" class="row_heading level1 row1" >male</th>
+      <td id="T_1e94c_row1_col0" class="data row1 col0" >8.20k</td>
+    </tr>
+    <tr>
+      <th id="T_1e94c_level0_row2" class="row_heading level0 row2" rowspan="2">2</th>
+      <th id="T_1e94c_level1_row2" class="row_heading level1 row2" >female</th>
+      <td id="T_1e94c_row2_col0" class="data row2 col0" >1.67k</td>
+    </tr>
+    <tr>
+      <th id="T_1e94c_level1_row3" class="row_heading level1 row3" >male</th>
+      <td id="T_1e94c_row3_col0" class="data row3 col0" >2.13k</td>
+    </tr>
+    <tr>
+      <th id="T_1e94c_level0_row4" class="row_heading level0 row4" rowspan="2">3</th>
+      <th id="T_1e94c_level1_row4" class="row_heading level1 row4" >female</th>
+      <td id="T_1e94c_row4_col0" class="data row4 col0" >2.32k</td>
+    </tr>
+    <tr>
+      <th id="T_1e94c_level1_row5" class="row_heading level1 row5" >male</th>
+      <td id="T_1e94c_row5_col0" class="data row5 col0" >4.39k</td>
+    </tr>
+  </tbody>
+</table>
+
+Here's an example of a percentage format:
+
+```python
+df.groupby(['pclass', 'sex']).agg({'fare': 'sum'}).div(df['fare'].sum()).stb.pretty(precision=0, caption="Fare Percentage")
+```
+
+<style type="text/css">
+</style>
+<table id="T_e031b">
+<caption>Fare Percentage</caption>
+  <thead>
+    <tr>
+      <th class="blank" >&nbsp;</th>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_e031b_level0_col0" class="col_heading level0 col0" >fare</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >pclass</th>
+      <th class="index_name level1" >sex</th>
+      <th class="blank col0" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_e031b_level0_row0" class="row_heading level0 row0" rowspan="2">1</th>
+      <th id="T_e031b_level1_row0" class="row_heading level1 row0" >female</th>
+      <td id="T_e031b_row0_col0" class="data row0 col0" >35%</td>
+    </tr>
+    <tr>
+      <th id="T_e031b_level1_row1" class="row_heading level1 row1" >male</th>
+      <td id="T_e031b_row1_col0" class="data row1 col0" >29%</td>
+    </tr>
+    <tr>
+      <th id="T_e031b_level0_row2" class="row_heading level0 row2" rowspan="2">2</th>
+      <th id="T_e031b_level1_row2" class="row_heading level1 row2" >female</th>
+      <td id="T_e031b_row2_col0" class="data row2 col0" >6%</td>
+    </tr>
+    <tr>
+      <th id="T_e031b_level1_row3" class="row_heading level1 row3" >male</th>
+      <td id="T_e031b_row3_col0" class="data row3 col0" >7%</td>
+    </tr>
+    <tr>
+      <th id="T_e031b_level0_row4" class="row_heading level0 row4" rowspan="2">3</th>
+      <th id="T_e031b_level1_row4" class="row_heading level1 row4" >female</th>
+      <td id="T_e031b_row4_col0" class="data row4 col0" >8%</td>
+    </tr>
+    <tr>
+      <th id="T_e031b_level1_row5" class="row_heading level1 row5" >male</th>
+      <td id="T_e031b_row5_col0" class="data row5 col0" >15%</td>
+    </tr>
+  </tbody>
+</table>
+
+
+Behind the scenes, `pretty` will attempt to normalize the values. You can control the
+`precision`, `rows` add a `caption`.
 
 
 ## Caveats

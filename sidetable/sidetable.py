@@ -538,45 +538,61 @@ class SideTableAccessor:
                nan='--',
                hide_index=False,
                pct_thresh=1,
-               rows=10,
+               rows=20,
+               exclude=None,
                caption=None):
         """ Pretty print a dataframe
 
         precision (int):    How many digits to show
         percent (bool):     Format numbers less than 1 as percentages
         nan (string):       Display instead of NaN values
-        hide_index (bool):  Suppres the style of the index
-        pct_thresh (int):   Value below which will be show
+        hide_index (bool):  Suppress the style of the index
+        pct_thresh (int):   Value below which will be shown
         rows(int):          Number of rows to display in the output
+        exclude(list):      List of column names to exclude
         caption (str):      Caption to display at the top of the dataframe
 
         Returns:
         """
         numeric_cols = self._obj.select_dtypes(include='number').columns
+        # Allow the user to filter out numeric columns that should not be formatted
+        exclude_list = exclude or []
         other_cols = self._obj.select_dtypes(exclude='number')
         format_dict = {}
         results = []
         for col in numeric_cols:
-            new_col, format_data = self._pretty_col(self._obj[col], precision,
-                                                    percent, pct_thresh)
-            format_dict[col] = format_data
+            if col not in exclude_list:
+                new_col, format_data = self._pretty_col(
+                    self._obj[col], precision, percent, pct_thresh)
+                format_dict[col] = format_data
+            else:
+                format_dict[col] = None
+                new_col = self._obj[col].values
             results.append(pd.Series(new_col, name=col))
         formatted_df = pd.concat(results, axis=1)
         full_df = pd.concat([other_cols, formatted_df], axis=1)
         # Truncate the number of rows
         # Max sure the column order is preserved
+        # Add a filler to indicate truncation
+        if isinstance(full_df.index, pd.MultiIndex):
+            filler = pd.DataFrame(columns=full_df.index.names,
+                                  index=[('--', ) * full_df.index.nlevels])
+        else:
+            filler = pd.DataFrame(columns=full_df.columns, index=['--'])
+            filler.loc['--'] = pd.NA
         orig_col_order = self._obj.columns
         if len(full_df.index) > rows:
             short_table = pd.concat(
-                [full_df.head(int(rows / 2)),
+                [full_df.head(int(rows / 2)), filler,
                  full_df.tail(int(rows / 2))])
-            return_data = short_table[orig_col_order].style.format(
-                format_dict, na_rep=nan)
+            return_data = short_table[orig_col_order].style.format(format_dict,
+                                                                   na_rep=nan)
         else:
             return_data = full_df[orig_col_order].style.format(format_dict,
-                                                                  na_rep=nan)
+                                                               na_rep=nan)
         if hide_index:
             return_data.hide(axis="index")
         if caption:
             return_data.set_caption(caption)
         return return_data
+        
