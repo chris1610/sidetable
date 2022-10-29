@@ -171,3 +171,17 @@ def test_flatten(titanic):
         'embark_town', 'class', 'fare_sum_female', 'fare_sum_male',
         'fare_mean_female', 'fare_mean_male'
     ]
+
+
+def test_pretty(titanic):
+    """ Test the pretty print"""
+    summary = titanic.groupby(['pclass', 'sex']).agg({'fare': 'sum'}).stb.pretty()
+    assert isinstance(summary, pd.io.formats.style.Styler)
+
+    result_str = '  fare\npclass sex \n1 female 9.98k\nmale 8.20k\n2 female 1.67k\nmale 2.13k\n3 female 2.32k\nmale 4.39k\n'
+    assert summary.to_string() == result_str
+
+    summary = titanic.groupby(['pclass', 'sex']).agg({'fare': 'sum'}).stb.pretty(rows=5, precision=1, caption="Fares")
+    assert isinstance(summary, pd.io.formats.style.Styler)
+    result_str = '  fare\npclass sex \n1 female 10.0k\nmale 8.2k\n-- -- --\n3 female 2.3k\nmale 4.4k\n'
+    assert summary.to_string() == result_str
