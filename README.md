@@ -911,8 +911,6 @@ Use `stb.pretty()` to format it nicely so you can have the same order or magnitu
 ```python
 df.groupby(['pclass', 'sex']).agg({'fare': 'sum'}).div(df['fare'].sum()).stb.pretty()
 ```
-<style type="text/css">
-</style>
 <table id="T_1e94c">
   <thead>
     <tr>
@@ -963,8 +961,6 @@ Here's an example of a percentage format:
 df.groupby(['pclass', 'sex']).agg({'fare': 'sum'}).div(df['fare'].sum()).stb.pretty(precision=0, caption="Fare Percentage")
 ```
 
-<style type="text/css">
-</style>
 <table id="T_e031b">
 <caption>Fare Percentage</caption>
   <thead>
